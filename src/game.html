@@ -17,7 +17,7 @@ body{background:var(--linen);color:var(--fjord);font-family:var(--body);font-siz
 button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 img.ico{width:20px;height:20px;display:inline-block;vertical-align:middle;flex-shrink:0;pointer-events:none}
 .i14{width:14px!important;height:14px!important}.i16{width:16px!important;height:16px!important}.i24{width:24px!important;height:24px!important}.i28{width:28px!important;height:28px!important}.i36{width:36px!important;height:36px!important}.i48{width:48px!important;height:48px!important}.i64{width:64px!important;height:64px!important}
-#app{height:100%;box-sizing:border-box;max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:8px;padding-block:8px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+#app{height:100%;box-sizing:border-box;margin:0 auto;display:flex;flex-direction:column;gap:8px;padding-block:8px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
 
 .top{display:flex;align-items:center;gap:8px}
 .brand{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:.5px;line-height:1;color:var(--falun);margin-right:auto}
@@ -268,6 +268,14 @@ h3{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--fjor
 .ichip{display:flex;align-items:center;gap:4px;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:3px 9px 3px 3px;font-weight:700;font-size:12px;cursor:pointer}
 .ichip img{width:30px;height:28px;object-fit:contain}
 #stage::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;background:radial-gradient(120% 90% at 50% 45%,transparent 55%,rgba(20,40,50,.22))}
+/* Breite Bildschirme (PC, iPad quer): Insel füllt die volle Breite, Auswahl als schwebende Karte rechts */
+@media (min-width:900px){
+  .sheet{left:auto;right:12px;bottom:12px;width:420px;max-height:calc(100% - 24px);border-radius:20px;box-shadow:0 10px 36px rgba(20,30,35,.25);transform:translateX(calc(100% + 24px))}
+  .sheet.open{transform:none}
+  .panel{padding-inline:max(14px, calc((100% - 880px) / 2))}
+  .tabs{max-width:880px;width:100%;margin:0 auto}
+  .zoom{right:auto;left:12px}
+}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 
@@ -910,7 +918,7 @@ function resize(){
   const r=$('#stage').getBoundingClientRect();if(!r.width)return;W=r.width;H=r.height;dpr=Math.min(3,window.devicePixelRatio||1);
   cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
   seaGrad=ctx.createLinearGradient(0,0,0,H);seaGrad.addColorStop(0,'#93B3B9');seaGrad.addColorStop(1,'#6A909A');
-  if(!fitted){view.z=Math.max(.6,Math.min(W/(9*TW),H/(10*TH+40)));view.x=0;view.y=0;fitted=true;}
+  if(!fitted){view.z=W>=880?Math.max(.6,Math.min(W/(16*TW),H/(15*TH+40))):Math.max(.6,Math.min(W/(9*TW),H/(10*TH+40)));view.x=0;view.y=0;fitted=true;}
 }
 const SHADE=new Map();
 function shade(hex,f){const key=hex+f;let v=SHADE.get(key);if(v)return v;if(hex[0]!=='#')return hex;const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;if(f<0){r*=1+f;g*=1+f;b*=1+f;}else{r+=(255-r)*f;g+=(255-g)*f;b+=(255-b)*f;}v='rgb('+(r|0)+','+(g|0)+','+(b|0)+')';SHADE.set(key,v);return v;}
@@ -1543,7 +1551,7 @@ cv.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);drag=null;pinch
 cv.addEventListener('wheel',e=>{e.preventDefault();zoomTo(view.z*(e.deltaY<0?1.1:.9));},{passive:false});
 function zoomTo(z){const nz=Math.max(.5,Math.min(3.2,z)),f=nz/view.z;view.x*=f;view.y*=f;view.z=nz;}
 function selectTile(i){sel=(i<0||S.tiles[i].t==='water')?-1:i;demolishArm=false;renderSheet();
-  if(sel>=0){const[wx,wy]=tilePos(sel%N,(sel/N)|0),py=H/2+view.y+wy*view.z,px=W/2+view.x+wx*view.z,want=H*.24;glide={x:view.x+(W/2-px)*.5,y:view.y+(want-py)};}}
+  if(sel>=0){const[wx,wy]=tilePos(sel%N,(sel/N)|0),py=H/2+view.y+wy*view.z,px=W/2+view.x+wx*view.z,want=H*.24;if(W>=880){const cx=(W-440)/2;glide={x:view.x+(cx-px),y:view.y+(H/2-py)};}else glide={x:view.x+(W/2-px)*.5,y:view.y+(want-py)};}}
 let glide=null;
 
 /* ---------- Oberfläche ---------- */
