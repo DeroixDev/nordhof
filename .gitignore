@@ -1,0 +1,5 @@
+node_modules/
+build/
+.nordhof-team
+.DS_Store
+www/index.html

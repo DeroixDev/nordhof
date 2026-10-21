@@ -1,0 +1,9 @@
+{
+  "appId": "de.deroix.nordhof",
+  "appName": "Nordhof",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#ECE7DC"
+  }
+}
