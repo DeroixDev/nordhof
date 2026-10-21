@@ -895,36 +895,42 @@ function door(sx,sy,face,c,ex,ey,hh,cx,cy){
 }
 /* Satteldach-Haus; gibt die Kaminposition zurück */
 function gable(sx,sy,o,lit){
-  const{ex,ey,h,rh,wall,roof,ax,mat,turf}=o,z=o.z||0,cx=o.cx||0,cy=o.cy||0,ov=.06,H=z+h;
+  const{ex,ey,h,rh,wall,roof,ax,mat,turf}=o,z=o.z||0,cx=o.cx||0,cy=o.cy||0,ov=.07,H=z+h,th=1.8;
   walls(sx,sy,ex,ey,h,wall,mat,z,cx,cy);
-  const rL=turf?'#8BA65F':roof,rD=shade(rL,-.24);
+  const rL=turf?'#8BA65F':roof,rD=shade(rL,-.24),edge=shade(rL,-.5);
+  /* Dach als geschlossener Körper: hintere Fläche, Giebel, vordere Fläche, Traufkante, Ortgang auf beiden Seiten, Firstbalken */
+  const P=(wx,wy,hh)=>ax==='x'?[cx+wx,cy+wy,hh]:[cx+wy,cy+wx,hh];
+  const A=ax==='x'?ex:ey,Bw=ax==='x'?ey:ex;
+  const E0=H-1,R=H+rh;
   let chim=null;
-  if(ax==='x'){
-    if(!z){const nw=Math.max(1,Math.round(ex/.18));for(let k=0;k<nw;k++){const c=-ex+(k+.5)*(2*ex/nw);win(sx,sy,'y',c,ex,ey,h*.35,h*.35+Math.min(5,h*.4),lit&&k%2===0,cx,cy);}
-      door(sx,sy,'x',0,ex,ey,Math.min(h*.72,7),cx,cy);}
-    pq(sx,sy,[[cx+ex,cy-ey,H],[cx+ex,cy+ey,H],[cx+ex,cy,H+rh]],shade(wall,-.3));
-    const R=[[cx-ex-ov,cy+ey+ov,H-1],[cx+ex+ov,cy+ey+ov,H-1],[cx+ex+ov,cy,H+rh],[cx-ex-ov,cy,H+rh]];
-    pq(sx,sy,[[cx-ex,cy+ey,H],[cx+ex,cy+ey,H],[cx+ex,cy+ey,H-2.5],[cx-ex,cy+ey,H-2.5]],'rgba(0,0,0,.16)');
-    pq(sx,sy,R,rL);
-    if(turf){ctx.strokeStyle='rgba(70,95,45,.55)';ctx.lineWidth=.8;ctx.beginPath();for(let k=0;k<14;k++){const u=-ex+((k*.37)%1)*2*ex,v=((k*.61)%1),[x,y]=spt(sx,sy,cx+u,cy+(ey+ov)*(1-v),H-1+(rh+1)*v);ctx.moveTo(x,y);ctx.lineTo(x+.6,y-2.2);}ctx.stroke();}
-    else for(const f of[.25,.5,.75])pl(sx,sy,[cx-ex-ov,cy+(ey+ov)*(1-f),H-1+(rh+1)*f],[cx+ex+ov,cy+(ey+ov)*(1-f),H-1+(rh+1)*f],'rgba(0,0,0,.14)',.7);
-    pq(sx,sy,[[cx+ex+ov,cy+ey+ov,H-1],[cx+ex+ov,cy,H+rh],[cx+ex+ov,cy,H+rh+1.4],[cx+ex+ov,cy+ey+ov,H+.4]],shade(rL,-.45));
-    pl(sx,sy,[cx-ex-ov,cy,H+rh],[cx+ex+ov,cy,H+rh],'rgba(255,255,255,.3)',.9);
-    chim=[cx+ex*.45,cy-.02];
-  } else {
-    if(!z){const nw=Math.max(1,Math.round(ey/.18));for(let k=0;k<nw;k++){const c=-ey+(k+.5)*(2*ey/nw);win(sx,sy,'x',c,ex,ey,h*.35,h*.35+Math.min(5,h*.4),lit&&k%2===1,cx,cy);}
-      door(sx,sy,'y',0,ex,ey,Math.min(h*.72,7),cx,cy);}
-    pq(sx,sy,[[cx-ex,cy+ey,H],[cx+ex,cy+ey,H],[cx,cy+ey,H+rh]],shade(wall,-.03));
-    pq(sx,sy,[[cx+ex,cy+ey,H],[cx+ex,cy-ey,H],[cx+ex,cy-ey,H-2.5],[cx+ex,cy+ey,H-2.5]],'rgba(0,0,0,.18)');
-    const R=[[cx+ex+ov,cy-ey-ov,H-1],[cx+ex+ov,cy+ey+ov,H-1],[cx,cy+ey+ov,H+rh],[cx,cy-ey-ov,H+rh]];
-    pq(sx,sy,R,rD);
-    if(turf){ctx.strokeStyle='rgba(60,85,40,.6)';ctx.lineWidth=.8;ctx.beginPath();for(let k=0;k<14;k++){const u=-ey+((k*.37)%1)*2*ey,v=((k*.61)%1),[x,y]=spt(sx,sy,cx+(ex+ov)*(1-v),cy+u,H-1+(rh+1)*v);ctx.moveTo(x,y);ctx.lineTo(x+.6,y-2.2);}ctx.stroke();}
-    else for(const f of[.25,.5,.75])pl(sx,sy,[cx+(ex+ov)*(1-f),cy-ey-ov,H-1+(rh+1)*f],[cx+(ex+ov)*(1-f),cy+ey+ov,H-1+(rh+1)*f],'rgba(0,0,0,.16)',.7);
-    pq(sx,sy,[[cx-ex-ov,cy+ey+ov,H-1],[cx,cy+ey+ov,H+rh],[cx,cy+ey+ov,H+rh+1.4],[cx-ex-ov,cy+ey+ov,H+.4]],shade(rL,-.05));
-    pq(sx,sy,[[cx+ex+ov,cy+ey+ov,H-1],[cx,cy+ey+ov,H+rh],[cx,cy+ey+ov,H+rh+1.4],[cx+ex+ov,cy+ey+ov,H+.4]],shade(rL,-.4));
-    pl(sx,sy,[cx,cy-ey-ov,H+rh],[cx,cy+ey+ov,H+rh],'rgba(255,255,255,.28)',.9);
-    chim=[cx+.02,cy-ey*.45];
+  if(!z){
+    if(ax==='x'){const nw=Math.max(1,Math.round(ex/.18));for(let k=0;k<nw;k++){const c=-ex+(k+.5)*(2*ex/nw);win(sx,sy,'y',c,ex,ey,h*.35,h*.35+Math.min(5,h*.4),lit&&k%2===0,cx,cy);}door(sx,sy,'x',0,ex,ey,Math.min(h*.72,7),cx,cy);}
+    else{const nw=Math.max(1,Math.round(ey/.18));for(let k=0;k<nw;k++){const c=-ey+(k+.5)*(2*ey/nw);win(sx,sy,'x',c,ex,ey,h*.35,h*.35+Math.min(5,h*.4),lit&&k%2===1,cx,cy);}door(sx,sy,'y',0,ex,ey,Math.min(h*.72,7),cx,cy);}
   }
+  const front=ax==='x'?rL:rD,back=ax==='x'?shade(rL,-.32):shade(rL,.06);
+  // hintere Dachfläche (schaut über den First, wenn das Dach flach genug ist)
+  pq(sx,sy,[P(-A-ov,-Bw-ov,E0),P(A+ov,-Bw-ov,E0),P(A+ov,0,R),P(-A-ov,0,R)],back);
+  pq(sx,sy,[P(-A-ov,-Bw-ov,E0),P(A+ov,-Bw-ov,E0),P(A+ov,-Bw-ov,E0-th),P(-A-ov,-Bw-ov,E0-th)],edge);
+  // Giebelwand bis unter den First
+  pq(sx,sy,[P(A,-Bw,H),P(A,Bw,H),P(A,0,R-.5)],ax==='x'?shade(wall,-.3):shade(wall,-.03));
+  pl(sx,sy,P(A,0,H),P(A,0,R-3),'rgba(40,28,18,.25)',.7);
+  // Schatten der Traufe auf der Längswand
+  pq(sx,sy,[P(-A,Bw,H),P(A,Bw,H),P(A,Bw,H-2.5),P(-A,Bw,H-2.5)],'rgba(0,0,0,.17)');
+  // vordere Dachfläche
+  pq(sx,sy,[P(-A-ov,Bw+ov,E0),P(A+ov,Bw+ov,E0),P(A+ov,0,R),P(-A-ov,0,R)],front);
+  if(turf){ctx.strokeStyle=ax==='x'?'rgba(70,95,45,.55)':'rgba(60,85,40,.6)';ctx.lineWidth=.8;ctx.beginPath();
+    for(let k=0;k<16;k++){const u=-A+((k*.37)%1)*2*A,v=((k*.61)%1)*.92+.04,[x,y]=spt(sx,sy,...P(u,(Bw+ov)*(1-v),E0+(rh+1)*v).slice(0,2),E0+(rh+1)*v);ctx.moveTo(x,y);ctx.lineTo(x+.6,y-2.2);}ctx.stroke();}
+  else for(const f of[.2,.4,.6,.8])pl(sx,sy,P(-A-ov,(Bw+ov)*(1-f),E0+(rh+1)*f),P(A+ov,(Bw+ov)*(1-f),E0+(rh+1)*f),'rgba(0,0,0,.13)',.7);
+  // Traufkante vorne als Dachdicke
+  pq(sx,sy,[P(-A-ov,Bw+ov,E0),P(A+ov,Bw+ov,E0),P(A+ov,Bw+ov,E0-th),P(-A-ov,Bw+ov,E0-th)],edge);
+  // Ortgang: Brett auf beiden Schrägen der sichtbaren Giebelseite
+  const gx=A+ov;
+  pq(sx,sy,[P(gx,Bw+ov,E0-th),P(gx,0,R-th),P(gx,0,R+.6),P(gx,Bw+ov,E0+.6)],shade(rL,-.42));
+  pq(sx,sy,[P(gx,-Bw-ov,E0-th),P(gx,0,R-th),P(gx,0,R+.6),P(gx,-Bw-ov,E0+.6)],shade(rL,-.36));
+  // Firstbalken
+  pq(sx,sy,[P(-A-ov,-.02,R+.4),P(A+ov,-.02,R+.4),P(A+ov,.02,R+.4),P(-A-ov,.02,R+.4)],shade(rL,-.3));
+  pl(sx,sy,P(-A-ov,.02,R+.4),P(A+ov,.02,R+.4),'rgba(255,255,255,.28)',.9);
+  chim=ax==='x'?[cx+ex*.45,cy-.02]:[cx+.02,cy-ey*.45];
   return chim;
 }
 function chimney(sx,sy,c,top,col){
