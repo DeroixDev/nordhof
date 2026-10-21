@@ -24,12 +24,14 @@ Die Signatur läuft nach 7 Tagen ab. iPhone anschließen und „Nordhof aktualis
 
 ## So läuft das Spiel
 
-- **Insel:** Feld antippen, bauen. Lage zählt: Holzfäller neben Wald, Bäckerei neben Feldern, Schmiede neben Schmelze geben Bonus. Wildnis am Rand lässt sich erschließen.
+- **Insel:** Feld antippen, bauen. Lage zählt: Holzfäller neben Wald, Bäckerei neben Feldern, Schmiede neben Schmelze geben Bonus.
+- **Gebiete:** Um das Heimatland liegen Nordwald, Heide, Moor, Gebirge und Dünen. Jedes wird mit Rohstoffen, Zeit und genug Einwohnern erkundet und hat eigene Funde und Gebäude: Jäger nur im Nordwald, Imker in der Heide, Lehm und Flachs im Moor, Erz und Silber im Gebirge, Bernstein an den Dünen.
+- **Bauzeiten:** Bauen, Ausbauen und Erkunden dauert, von Sekunden bis Stunden. Jeder Auftrag braucht einen freien Baumeister. Am Anfang gibt es 2, jede Bauhütte bringt einen weiteren (höchstens 5). Mit Münzen geht es sofort.
 - **Wirtschaft:** Holz → Bretter oder Holzkohle, Weizen → Brot, Erz + Kohle → Eisen, Lehm + Kohle → Ziegel, Wolle → Stoff, Flachs → Leinen → Segel, Honig → Met, Milch → Käse, Fell → Leder, Stoff + Leder → Kleidung, Eisen → Werkzeug, Waffen, Rüstung.
-- **Ausbau:** Stufe 1 bis 5. Ab Stufe 3 braucht es Werkzeug, ab Stufe 4 Silber.
+- **Ausbau:** Stufe 1 bis 8. Ab Stufe 3 braucht es Werkzeug, ab Stufe 5 Silber, ab Stufe 7 Runensteine.
 - **Dorf:** Hütten, Langhäuser und Steinhäuser geben Wohnraum. Einwohner arbeiten in den Betrieben, essen Fisch, Brot oder Käse und zahlen Steuern. Brunnen, Markt, Methalle und Stabkirche heben die Laune. Der Reiter „Dorf“ zeigt Herstellung und Verbrauch je Rohstoff.
 - **Info:** Das kleine i an jedem Gebäude, Rohstoff, Krieger und Ziel erklärt Kosten, Ketten und Werte.
-- **Offline:** Produktion läuft bis zu 8 Stunden weiter, beim Öffnen kommt ein Bericht.
+- **Offline:** Produktion läuft bis zu 8 Stunden weiter, Bauaufträge werden auch offline fertig. Beim Öffnen kommt ein Bericht.
 - **Wehr:** Alle 15 Minuten Plünderer. Palisaden, Wachtürme und Bogenposten halten sie auf.
 - **Raubzug:** Bis zu 3 Krieger mit Proviant, Waffen und Rüstung. Nach einigen Schritten zieht ein Sturm auf und es wird gefährlicher. Nur am Schiff oder am Signalfeuer kommst du raus. Wer fällt, verliert, was er trägt; das Runenfach kommt immer heim.
 
