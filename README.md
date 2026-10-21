@@ -25,8 +25,10 @@ Die Signatur läuft nach 7 Tagen ab. iPhone anschließen und „Nordhof aktualis
 ## So läuft das Spiel
 
 - **Insel:** Feld antippen, bauen. Lage zählt: Holzfäller neben Wald, Bäckerei neben Feldern, Schmiede neben Schmelze geben Bonus. Wildnis am Rand lässt sich erschließen.
-- **Wirtschaft:** Holz → Bretter, Weizen → Brot, Brot + Fisch → Proviant, Erz + Holz → Eisen, Wolle → Stoff, Eisen → Werkzeug, Waffen, Rüstung.
+- **Wirtschaft:** Holz → Bretter oder Holzkohle, Weizen → Brot, Erz + Kohle → Eisen, Lehm + Kohle → Ziegel, Wolle → Stoff, Flachs → Leinen → Segel, Honig → Met, Milch → Käse, Fell → Leder, Stoff + Leder → Kleidung, Eisen → Werkzeug, Waffen, Rüstung.
 - **Ausbau:** Stufe 1 bis 5. Ab Stufe 3 braucht es Werkzeug, ab Stufe 4 Silber.
+- **Dorf:** Hütten, Langhäuser und Steinhäuser geben Wohnraum. Einwohner arbeiten in den Betrieben, essen Fisch, Brot oder Käse und zahlen Steuern. Brunnen, Markt, Methalle und Stabkirche heben die Laune. Der Reiter „Dorf“ zeigt Herstellung und Verbrauch je Rohstoff.
+- **Info:** Das kleine i an jedem Gebäude, Rohstoff, Krieger und Ziel erklärt Kosten, Ketten und Werte.
 - **Offline:** Produktion läuft bis zu 8 Stunden weiter, beim Öffnen kommt ein Bericht.
 - **Wehr:** Alle 15 Minuten Plünderer. Palisaden, Wachtürme und Bogenposten halten sie auf.
 - **Raubzug:** Bis zu 3 Krieger mit Proviant, Waffen und Rüstung. Nach einigen Schritten zieht ein Sturm auf und es wird gefährlicher. Nur am Schiff oder am Signalfeuer kommst du raus. Wer fällt, verliert, was er trägt; das Runenfach kommt immer heim.
