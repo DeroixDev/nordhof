@@ -229,6 +229,26 @@ h3{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--fjor
 .hp2 .s{display:flex;align-items:center;gap:6px}
 .gains{display:flex;flex-wrap:wrap;gap:6px}
 .gains div{display:flex;align-items:center;gap:4px;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:4px 8px 4px 4px;font-weight:700;font-size:13px;animation:popin .4s cubic-bezier(.2,1.6,.4,1) both}
+.mlist{display:flex;flex-direction:column;margin-top:12px}
+.mrow{display:flex;align-items:center;gap:12px;padding:11px 4px;border:none;border-top:1px solid var(--line);background:none;text-align:left;cursor:pointer;font-weight:600;font-size:15px;width:100%}
+.mrow:first-child{border-top:none}
+.mrow:active{background:var(--linen)}
+.mrow .ml{flex:1}
+.mrow .chev{width:8px;height:8px;border-right:2px solid var(--fjord-2);border-top:2px solid var(--fjord-2);transform:rotate(45deg);margin-right:6px}
+.mrow.stat{cursor:default}.mrow.stat b{font-variant-numeric:tabular-nums}
+.mrow.dev{color:var(--fjord-2)}
+.x.back::before,.x.back::after{display:none}
+.x.back{background:var(--linen)}
+.x.back::after{content:'';display:block;position:static;width:8px;height:8px;border-left:2.5px solid var(--fjord);border-bottom:2.5px solid var(--fjord);transform:rotate(45deg);margin-left:3px;background:none}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.dgrid .btn{justify-content:center}
+.drow{display:flex;align-items:center;gap:6px;margin-top:6px}
+.drow select,.drow input{flex:1;min-width:0;font:inherit;font-weight:600;padding:7px 8px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--fjord)}
+.drow input{max-width:110px}
+.drow .n{flex:1;font-weight:700}
+.ta{width:100%;box-sizing:border-box;min-height:90px;border-radius:12px;border:1px solid var(--line);background:var(--card);padding:8px;font:12px/1.4 var(--body);color:var(--fjord);resize:vertical;-webkit-user-select:text;user-select:text}
+.ta.mono{font-family:ui-monospace,Menlo,monospace;font-size:11px;min-height:160px}
+body.calm *{animation:none!important;transition:none!important}
 .switch{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
 .ibtn{position:absolute;top:5px;left:5px;width:22px;height:22px;border-radius:50%;border:1px solid var(--line);background:var(--paper);font:italic 700 13px/1 var(--display);color:var(--fjord);display:grid;place-items:center;padding:0;cursor:pointer;z-index:2;transition:transform .12s}
 .ibtn:active{transform:scale(.88)}
@@ -655,7 +675,7 @@ function fresh(){
   const s={v:3,pop:{n:BASEHOUSE,g:0,hunger:0},seed,t:now(),res,tiles:g.tiles,open:[0],explore:null,
     raid:{next:now()+12*60e3,n:0,pending:false,since:0,log:[]},
     boat:{k:'bretter',until:0},orders:[],crew:CREW.map(n=>({n,wounded:0})),
-    run:null,wins:[0,0,0,0],prep:{sel:[true,true,false],extra:0},opt:{fps:false}};
+    run:null,wins:[0,0,0,0],prep:{sel:[true,true,false],extra:0},opt:{fps:false,dn:'auto',eco:false,calm:false},started:now()};
   s.tiles[idx(MID,MID)].b={type:'hof',lvl:1,prog:0,run:0};
   s.tiles[idx(MID-1,MID+1)].b={type:'holzfaeller',lvl:1,prog:0,run:0};
   s.tiles[idx(MID+1,MID)].b={type:'feld',lvl:1,prog:0,run:0};
@@ -665,6 +685,7 @@ function load(){try{const raw=localStorage.getItem(SAVE);if(raw){const s=JSON.pa
 function migrate(s){
   for(const k in RES)if(typeof s.res[k]!=='number')s.res[k]=0;
   if(!s.pop)s.pop={n:BASEHOUSE,g:0,hunger:0};
+  s.opt=Object.assign({fps:false,dn:'auto',eco:false,calm:false},s.opt);if(!s.started)s.started=s.t||now();
   if(s.v===1){s.res.fisch+=60;s.res.brot+=30;s.v=2;}
   if(s.v===2){
     /* 0.3 hatte eine 15er-Insel: alte Felder in die Mitte der neuen Welt legen */
@@ -924,7 +945,7 @@ let W=0,H=0,dpr=1,view={x:0,y:0,z:1},sel=-1,fitted=false,seaGrad=null;
 function resize(){
   fitStrip();
   const app=$('#app'),hud=$('#hud'),nav=$('.tabs');if(hud&&nav){app.style.setProperty('--toph',Math.round(hud.getBoundingClientRect().height-10)+'px');const nr=nav.getBoundingClientRect();app.style.setProperty('--navh',Math.round(window.innerHeight-nr.top)+'px');}
-  const r=$('#stage').getBoundingClientRect();if(!r.width)return;W=r.width;H=r.height;dpr=Math.min(3,window.devicePixelRatio||1);
+  const r=$('#stage').getBoundingClientRect();if(!r.width)return;W=r.width;H=r.height;dpr=Math.min(S&&S.opt&&S.opt.eco?2:3,window.devicePixelRatio||1);
   cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
   seaGrad=ctx.createLinearGradient(0,0,0,H);seaGrad.addColorStop(0,'#93B3B9');seaGrad.addColorStop(1,'#6A909A');
   if(!fitted){view.z=W>=880?Math.max(.6,Math.min(W/(16*TW),H/(15*TH+40))):Math.max(.6,Math.min(W/(9*TW),H/(10*TH+40)));view.x=0;view.y=0;fitted=true;}
@@ -1525,7 +1546,7 @@ function loop(ts){
   if(S.opt.fps){fpsN++;if(ts-fpsT>500){$('#fps').textContent=Math.round(fpsN*1000/(ts-fpsT))+' fps';fpsN=0;fpsT=ts;}}
   requestAnimationFrame(loop);
 }
-function updNight(){const d=new Date(),h=d.getHours()+d.getMinutes()/60;night=h>=22||h<5?1:h>=19?(h-19)/3:h<7?(7-h)/2:0;}
+function updNight(){const dn=S&&S.opt&&S.opt.dn;if(dn==='tag'){night=0;return;}if(dn==='nacht'){night=1;return;}const d=new Date(),h=d.getHours()+d.getMinutes()/60;night=h>=22||h<5?1:h>=19?(h-19)/3:h<7?(7-h)/2:0;}
 
 /* Gebäude-Vorschaubilder aus denselben Zeichenfunktionen */
 const THUMB={};
@@ -1933,12 +1954,98 @@ function showReport(rep){
   h+='<div class="btns"><button class="btn wide" data-act="closemodal">Weiter</button></div>';
   $('#modalCard').innerHTML=h;$('#modal').hidden=false;
 }
-function showMenu(){
-  resetArm=false;
-  $('#modalCard').innerHTML='<div class="head">'+IC('haus','i48')+'<div class="t"><h2>Nordhof</h2><p class="sub">Prototyp 0.4 · Spielstand nur auf diesem Gerät</p></div><button class="x" data-act="closemodal" aria-label="Schließen"></button></div>'+
-    '<div class="switch" style="margin-top:14px"><span class="n">'+IC('uhr','i24')+'FPS anzeigen</span><button class="btn small '+(S.opt.fps?'':'alt')+'" data-act="fps">'+(S.opt.fps?'An':'Aus')+'</button></div>'+
-    '<div class="switch"><span class="n">'+IC('plus','i24')+'Neue Insel</span><button class="btn small alt" data-act="reset">Neu beginnen</button></div>';
-  $('#modal').hidden=false;
+/* ---------- Menü ---------- */
+const VERSION='0.5';
+const MROW=(act,ic,label,extra,cls)=>'<button class="mrow'+(cls?' '+cls:'')+'" data-act="'+act+'"'+(extra||'')+'>'+IC(ic,'i24')+'<span class="ml">'+label+'</span><span class="chev"></span></button>';
+const MHEAD=(ic,title,sub,back)=>'<div class="head">'+(back?'<button class="x back" data-act="mpage" data-p="main" aria-label="Zurück"></button>':IC(ic,'i48'))+'<div class="t"><h2>'+title+'</h2>'+(sub?'<p class="sub">'+sub+'</p>':'')+'</div><button class="x" data-act="closemodal" aria-label="Schließen"></button></div>';
+const TOG=(key,label,ic)=>'<div class="switch"><span class="n">'+IC(ic,'i24')+label+'</span><button class="btn small '+(S.opt[key]?'':'alt')+'" data-act="opt" data-k="'+key+'">'+(S.opt[key]?'An':'Aus')+'</button></div>';
+let mPage='main';
+function showMenu(page){
+  resetArm=false;mPage=page||'main';let h='';
+  if(mPage==='main'){
+    h=MHEAD('haus','Nordhof','Version '+VERSION+' · Spielstand nur auf diesem Gerät')+'<div class="mlist">'+
+      MROW('closemodal','schiff','Weiterspielen')+MROW('mpage','arbeit','Einstellungen',' data-p="set"')+MROW('mpage','truhe','Spielstand sichern und laden',' data-p="save"')+
+      MROW('mpage','krone','Statistik',' data-p="stats"')+MROW('mpage','haus','Anleitung',' data-p="help"')+MROW('mpage','rune','Über Nordhof',' data-p="about"')+
+      MROW('mpage','schloss','Entwicklermenü',' data-p="dev"','dev')+'</div>'+
+      '<div class="switch"><span class="n">'+IC('plus','i24')+'Neue Insel</span><button class="btn small alt" data-act="reset">Neu beginnen</button></div>';
+  } else if(mPage==='set'){
+    h=MHEAD('','Einstellungen','',1)+
+      '<div class="switch"><span class="n">'+IC('uhr','i24')+'Tag und Nacht</span><button class="btn small '+(S.opt.dn!=='tag'?'':'alt')+'" data-act="dn" data-v="'+(S.opt.dn!=='tag'?'tag':'auto')+'">'+(S.opt.dn!=='tag'?'An':'Aus')+'</button></div>'+
+      TOG('eco','Akku sparen (weniger Auflösung)','feuer')+TOG('calm','Weniger Animationen','herz')+TOG('fps','FPS anzeigen','uhr');
+  } else if(mPage==='save'){
+    h=MHEAD('','Spielstand','Alles bleibt auf dem Gerät. Zum Sichern als Text kopieren oder als Datei speichern.',1)+
+      '<div class="btns"><button class="btn wide" data-act="exp" data-how="copy">'+IC('truhe','i16')+'Als Text kopieren</button></div>'+
+      '<div class="btns"><button class="btn alt wide" data-act="exp" data-how="file">'+IC('truhe','i16')+'Als Datei speichern</button></div>'+
+      '<h3>Laden</h3><textarea id="impTxt" class="ta" placeholder="Gesicherten Spielstand hier einfügen"></textarea>'+
+      '<div class="btns"><button class="btn alt" style="flex:1" data-act="impfile">Datei wählen</button><button class="btn red" style="flex:1" data-act="imp">Laden und ersetzen</button></div><input type="file" id="impF" accept=".json,application/json,text/plain" hidden>';
+  } else if(mPage==='stats'){
+    let bs=0,lv=0;S.tiles.forEach(T=>{if(T.b){bs++;lv+=T.b.lvl;}});
+    const rows=[['uhr','Spielzeit',fmtDur((now()-(S.started||now()))/1000)],['leute','Einwohner',Math.floor(S.pop.n)+' / '+D.house],['haus','Gebäude',bs],['hoch','Stufen zusammen',lv],
+      ['schiff','Gebiete erkundet',S.open.length+' / '+REG.length],['schild','Überfälle',S.raid.n||0],['schwert','Raubzüge gewonnen',S.wins.reduce((a,b)=>a+b,0)],['muenzen','Münzen',fmt(S.res.muenzen)]];
+    h=MHEAD('','Statistik','',1)+'<div class="mlist">'+rows.map(r=>'<div class="mrow stat">'+IC(r[0],'i24')+'<span class="ml">'+r[1]+'</span><b>'+r[2]+'</b></div>').join('')+'</div>';
+  } else if(mPage==='help'){
+    const H=[['Bauen','Feld antippen, Gebäude wählen. Bauen und Ausbauen dauert, jeder Auftrag braucht einen freien Baumeister. Mit Münzen geht es sofort.'],
+      ['Gebiete','Schilder auf der Insel zeigen verschlossene Gebiete. Antippen, erkunden, dann gibt es dort eigene Rohstoffe und Gebäude.'],
+      ['Dorf','Wohnhäuser bringen Einwohner. Sie arbeiten, essen und zahlen Steuern. Gute Laune macht alles schneller.'],
+      ['Wehr','Plünderer kommen regelmäßig. Palisaden, Türme und Bogenposten halten sie auf.'],
+      ['Raubzug','Mit bis zu 3 Kriegern losziehen, Beute sammeln und rechtzeitig am Schiff oder Signalfeuer heimfahren.'],
+      ['Offline','Bis zu 8 Stunden läuft alles weiter, auch Bauaufträge.']];
+    h=MHEAD('','Anleitung','',1)+H.map(x=>'<h3>'+x[0]+'</h3><p class="note" style="margin:0">'+x[1]+'</p>').join('');
+  } else if(mPage==='about'){
+    h=MHEAD('','Über Nordhof','',1)+'<p class="note">Nordhof '+VERSION+'. Ein Offline-Aufbauspiel im Nordmeer. Kein Konto, kein Server, keine Werbung. Der Spielstand liegt nur auf diesem Gerät.</p>';
+  } else if(mPage==='dev'){
+    const ks=Object.keys(RES);
+    h=MHEAD('','Entwicklermenü','Daten direkt ändern. Für Tests.',1)+
+      '<h3>Rohstoffe</h3><div class="dgrid"><button class="btn small alt" data-act="dev" data-d="res100">Alle +100</button><button class="btn small alt" data-act="dev" data-d="res1000">Alle +1000</button><button class="btn small alt" data-act="dev" data-d="resfull">Lager voll</button><button class="btn small alt" data-act="dev" data-d="res0">Alle auf 0</button><button class="btn small alt" data-act="dev" data-d="coin1k">Münzen +1000</button><button class="btn small alt" data-act="dev" data-d="coin10k">Münzen +10000</button></div>'+
+      '<div class="drow"><select id="dvK">'+ks.map(k=>'<option value="'+k+'">'+RES[k].n+'</option>').join('')+'</select><input id="dvN" type="number" inputmode="numeric" value="100"><button class="btn small" data-act="dev" data-d="setres">Setzen</button></div>'+
+      '<h3>Dorf</h3><div class="drow"><span class="n">Einwohner <small style="font-weight:500">bis Wohnraum '+D.house+'</small></span><input id="dvP" type="number" inputmode="numeric" value="'+Math.floor(S.pop.n)+'"><button class="btn small" data-act="dev" data-d="setpop">Setzen</button></div>'+
+      '<div class="dgrid"><button class="btn small alt" data-act="dev" data-d="fed">Hunger weg</button><button class="btn small alt" data-act="dev" data-d="heal">Krieger heilen</button></div>'+
+      '<h3>Bauen und Gebiete</h3><div class="dgrid"><button class="btn small alt" data-act="dev" data-d="jobs">Aufträge fertig</button><button class="btn small alt" data-act="dev" data-d="bld5">5 Baumeister</button><button class="btn small alt" data-act="dev" data-d="lvup">Alle Stufe +1</button><button class="btn small alt" data-act="dev" data-d="lvmax">Alle Stufe '+MAXLVL+'</button><button class="btn small alt" data-act="dev" data-d="open">Alle Gebiete offen</button><button class="btn small alt" data-act="dev" data-d="close">Nur Heimat offen</button></div>'+
+      '<h3>Zeit</h3><div class="dgrid"><button class="btn small alt" data-act="dev" data-d="w10">+10 min</button><button class="btn small alt" data-act="dev" data-d="w60">+1 h</button><button class="btn small alt" data-act="dev" data-d="w480">+8 h</button><button class="btn small alt" data-act="dev" data-d="raid">Überfall jetzt</button><button class="btn small alt" data-act="dev" data-d="noraid">Überfall +1 h</button><button class="btn small alt" data-act="dev" data-d="dn">Licht: '+({auto:'Uhrzeit',tag:'Tag',nacht:'Nacht'}[S.opt.dn||'auto'])+'</button></div>'+
+      '<h3>Rohdaten</h3><textarea id="dvJ" class="ta mono"></textarea><div class="btns"><button class="btn alt" style="flex:1" data-act="dev" data-d="jload">Neu laden</button><button class="btn red" style="flex:1" data-act="dev" data-d="japply">Übernehmen</button></div>';
+  }
+  $('#modalCard').innerHTML=h;$('#modal').hidden=false;
+  if(mPage==='dev')$('#dvJ').value=JSON.stringify(S,null,1);
+}
+function applyOpt(){document.body.classList.toggle('calm',!!S.opt.calm);$('#fps').hidden=!S.opt.fps;updNight();}
+/* Zeit vorspulen: alle Zeitpunkte rücken näher, der nächste Takt rechnet die Zeit nach wie nach einer Pause */
+function timeWarp(ms){
+  const sh=v=>v?v-ms:v;
+  S.t-=ms;S.tiles.forEach(T=>{if(T.b&&T.b.until)T.b.until-=ms;});
+  if(S.explore)S.explore.until-=ms;S.raid.next=sh(S.raid.next);if(S.raid.pending)S.raid.since-=ms;S.boat.until=sh(S.boat.until);
+  S.crew.forEach(c=>{if(c.wounded)c.wounded-=ms;});if(S.started)S.started-=ms;
+}
+function devAct(d){
+  const all=f=>{for(const k in RES)if(k!=='muenzen')f(k);};let msg='Erledigt';
+  switch(d){
+    case'res100':all(k=>S.res[k]+=100);break;case'res1000':all(k=>S.res[k]+=1000);break;
+    case'resfull':all(k=>S.res[k]=Math.max(S.res[k],capped(k)?D.cap:999));break;case'res0':all(k=>S.res[k]=0);break;
+    case'coin1k':S.res.muenzen+=1000;break;case'coin10k':S.res.muenzen+=10000;break;
+    case'setres':{const k=$('#dvK').value,n=+$('#dvN').value;if(isFinite(n))S.res[k]=Math.max(0,n);msg=RES[k].n+' = '+fmt(S.res[k]);break;}
+    case'setpop':{const n=+$('#dvP').value;if(isFinite(n))S.pop.n=Math.max(0,Math.floor(n));msg='Einwohner = '+S.pop.n;break;}
+    case'fed':S.pop.hunger=0;break;case'heal':S.crew.forEach(c=>c.wounded=0);break;
+    case'jobs':S.tiles.forEach(T=>{if(T.b&&T.b.until)T.b.until=now()-1;});if(S.explore)S.explore.until=now()-1;finishJobs();break;
+    case'bld5':{let n=builders();for(let k=0;n<5&&k<S.tiles.length;k++){const T=S.tiles[k];if(T.t==='grass'&&!T.b&&unlocked(k)){T.b={type:'bauhuette',lvl:1,prog:0,run:0};n++;}}gkV='';break;}
+    case'lvup':S.tiles.forEach(T=>{if(T.b&&T.b.lvl<MAXLVL&&!T.b.until)T.b.lvl++;});gkV='';break;
+    case'lvmax':S.tiles.forEach(T=>{if(T.b&&!T.b.until)T.b.lvl=MAXLVL;});gkV='';break;
+    case'open':S.open=REG.map((r,i)=>i);S.explore=null;gkV='';RCENT=regionCenters();break;
+    case'close':S.open=[0];S.explore=null;gkV='';RCENT=regionCenters();break;
+    case'w10':timeWarp(10*60e3);msg='10 Minuten vorgespult';break;case'w60':timeWarp(3600e3);msg='1 Stunde vorgespult';break;case'w480':timeWarp(8*3600e3);msg='8 Stunden vorgespult';break;
+    case'raid':S.raid.next=now();break;case'noraid':S.raid.pending=false;S.raid.next=now()+3600e3;break;
+    case'dn':S.opt.dn={auto:'tag',tag:'nacht',nacht:'auto'}[S.opt.dn||'auto'];applyOpt();break;
+    case'jload':break;
+    case'japply':{try{const o=JSON.parse($('#dvJ').value);if(!o||!o.tiles||!o.res)throw 0;S=migrate(o);vill.length=0;RCENT=regionCenters();gkV='';msg='Rohdaten übernommen';}catch(e){toast(IC('schloss','i24')+'Kein gültiger Spielstand');return;}break;}
+  }
+  derive();save();render();refresh();showMenu('dev');toast(IC('arbeit','i24')+msg);
+}
+function exportSave(how){
+  save();const txt=JSON.stringify(S);
+  if(how==='copy'){(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast(IC('truhe','i24')+'Spielstand kopiert'),()=>{const t=$('#impTxt');t.value=txt;t.select();toast(IC('truhe','i24')+'Text markiert, bitte kopieren');});}
+  else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download='nordhof-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}
+}
+function importSave(txt){
+  try{const o=JSON.parse(txt);if(!o||!o.tiles||!o.res||!(o.v>=1&&o.v<=3))throw 0;S=migrate(o);S.t=now();vill.length=0;for(const k in TREES)delete TREES[k];RCENT=regionCenters();gkV='';derive();save();applyOpt();$('#modal').hidden=true;tab='insel';render(true);toast(IC('truhe','i24')+'Spielstand geladen');}
+  catch(e){toast(IC('schloss','i24')+'Das ist kein Nordhof-Spielstand');}
 }
 
 /* ---------- Aktionen ---------- */
@@ -1966,7 +2073,13 @@ document.addEventListener('click',e=>{
     fire(){if(battle&&battle.fire){battle.fire=0;battle.boost=1;el.classList.add('off');}},
     closebattle(){battle=null;$('#modal').hidden=true;render();},
     closemodal(){$('#modal').hidden=true;},
-    fps(){S.opt.fps=!S.opt.fps;$('#fps').hidden=!S.opt.fps;showMenu();},
+    mpage(){showMenu(el.dataset.p);},
+    opt(){const k=el.dataset.k;S.opt[k]=!S.opt[k];applyOpt();if(k==='eco'){resize();}save();showMenu(mPage);},
+    dn(){S.opt.dn=el.dataset.v;applyOpt();save();showMenu(mPage);},
+    dev(){devAct(el.dataset.d);},
+    exp(){exportSave(el.dataset.how);},
+    imp(){importSave($('#impTxt').value);},
+    impfile(){const f=$('#impF');f.onchange=()=>{const file=f.files[0];if(!file)return;file.text().then(importSave);};f.click();},
     crew(){const i=+el.dataset.i;if(S.crew[i].wounded>now())return;S.prep.sel[i]=!S.prep.sel[i];render();},
     extra(){S.prep.extra=+el.dataset.n;render();},
     start(){prevHp={};runVis=null;startRun(+el.dataset.d);},
@@ -1978,7 +2091,7 @@ document.addEventListener('click',e=>{
     rest(){const R=S.run;if(R.extra<=0)return;R.extra--;R.step++;R.crew.forEach(w=>{if(w.hp>0)w.hp=Math.min(w.max,w.hp+10);});runLog('Rast am Feuer: alle +10.');toast(IC('herz','i24')+'Rast: alle +10');render();},
     extract(){const R=S.run,c=R.cells[R.pos];if(c.t!=='ship'&&c.t!=='feuer')return;endRun(true);save();render(true);},
     closerun(){S.run=null;render(true);},
-    menu(){showMenu();},
+    menu(){showMenu('main');},
     reset(){if(!resetArm){resetArm=true;el.textContent='Wirklich? Alles weg';el.classList.remove('alt');el.classList.add('red');return;}
       S=fresh();vill.length=0;for(const k in TREES)delete TREES[k];RCENT=regionCenters();derive();fillOrders();rollBoat();save();sel=-1;fitted=false;resize();$('#modal').hidden=true;tab='insel';render(true);}
   };
@@ -1993,7 +2106,7 @@ function boot(){
   if(!S)S=fresh();
   else{S.opt=S.opt||{fps:false};derive();const gap=now()-S.t;if(gap>60e3)rep=catchUp(gap);}
   derive();fillOrders();if(!S.boat.until)rollBoat();RCENT=regionCenters();
-  $('#fps').hidden=!S.opt.fps;
+  applyOpt();
   resize();updNight();render();save();
   if(rep&&(Object.keys(rep.gain).length||rep.raids.length||rep.done.length||rep.regs.length))showReport(rep);
   requestAnimationFrame(loop);

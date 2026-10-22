@@ -31,6 +31,7 @@ Die Signatur läuft nach 7 Tagen ab. iPhone anschließen und „Nordhof aktualis
 - **Ausbau:** Stufe 1 bis 8. Ab Stufe 3 braucht es Werkzeug, ab Stufe 5 Silber, ab Stufe 7 Runensteine.
 - **Dorf:** Hütten, Langhäuser und Steinhäuser geben Wohnraum. Einwohner arbeiten in den Betrieben, essen Fisch, Brot oder Käse und zahlen Steuern. Brunnen, Markt, Methalle und Stabkirche heben die Laune. Der Reiter „Dorf“ zeigt Herstellung und Verbrauch je Rohstoff.
 - **Info:** Das kleine i an jedem Gebäude, Rohstoff, Krieger und Ziel erklärt Kosten, Ketten und Werte.
+- **Menü:** Einstellungen (Tag und Nacht, Akku sparen, weniger Animationen, FPS), Spielstand als Text oder Datei sichern und wieder laden, Statistik, Anleitung und ein Entwicklermenü zum Ändern von Rohstoffen, Einwohnern, Stufen, Gebieten, Zeit und den Rohdaten.
 - **Offline:** Produktion läuft bis zu 8 Stunden weiter, Bauaufträge werden auch offline fertig. Beim Öffnen kommt ein Bericht.
 - **Wehr:** Alle 15 Minuten Plünderer. Palisaden, Wachtürme und Bogenposten halten sie auf.
 - **Raubzug:** Bis zu 3 Krieger mit Proviant, Waffen und Rüstung. Nach einigen Schritten zieht ein Sturm auf und es wird gefährlicher. Nur am Schiff oder am Signalfeuer kommst du raus. Wer fällt, verliert, was er trägt; das Runenfach kommt immer heim.
