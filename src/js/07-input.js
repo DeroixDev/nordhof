@@ -9,14 +9,16 @@ function screenToF(px,py){
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 cv.addEventListener('pointerdown',e=>{
   cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.offsetX,y:e.offsetY});hideTip();
-  if(ptrs.size===1)drag={x:e.offsetX,y:e.offsetY,vx:view.x,vy:view.y,moved:false,btn:e.button,touch:e.pointerType!=='mouse'};
-  if(ptrs.size===2){const[a,b]=[...ptrs.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y)||1,z:view.z,mx:(a.x+b.x)/2,my:(a.y+b.y)/2};if(drag)drag.moved=true;}
+  if(ptrs.size===1){drag={x:e.offsetX,y:e.offsetY,vx:view.x,vy:view.y,moved:false,btn:e.button,touch:e.pointerType!=='mouse'};
+    if(roadMode()&&e.button===0){drag.road=true;place.i0=tileAt(e.offsetX,e.offsetY);place.a=place.i0;roadUpd();}}
+  if(ptrs.size===2){const[a,b]=[...ptrs.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y)||1,z:view.z,mx:(a.x+b.x)/2,my:(a.y+b.y)/2};if(drag){drag.moved=true;if(drag.road){drag.road=false;place.a=-1;roadUpd();}}}
 });
 cv.addEventListener('pointermove',e=>{
   if(e.pointerType==='mouse'){mouse.x=e.offsetX;mouse.y=e.offsetY;mouse.in=true;}
   if(ptrs.has(e.pointerId)){
     ptrs.set(e.pointerId,{x:e.offsetX,y:e.offsetY});
     if(pinch&&ptrs.size===2){const[a,b]=[...ptrs.values()];zoomAt(pinch.z*Math.hypot(a.x-b.x,a.y-b.y)/pinch.d,(a.x+b.x)/2,(a.y+b.y)/2);return;}
+    if(drag&&drag.road){roadAt(e.offsetX,e.offsetY);return;}
     if(drag){const dx=e.offsetX-drag.x,dy=e.offsetY-drag.y;if(Math.abs(dx)+Math.abs(dy)>(drag.touch?8:4)){drag.moved=true;glide=null;$('#stage').classList.add('panning');}
       if(drag.moved){view.x=drag.vx+dx;view.y=drag.vy+dy;}}
     if(drag&&drag.moved)return;
@@ -27,6 +29,7 @@ cv.addEventListener('pointerleave',()=>{mouse.in=false;if(!ptrs.size){hov=-1;hid
 cv.addEventListener('pointerup',e=>{
   const d=drag;ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;
   if(ptrs.size===0){drag=null;$('#stage').classList.remove('panning');}
+  if(d&&d.road){roadCommit();return;}
   if(!d||d.moved||ptrs.size)return;
   if(d.btn===2){if(place)endPlace();else selectTile(-1);return;}
   if(d.btn!==0)return;
@@ -47,16 +50,36 @@ function visCY(){const v=visBox();return(v.t+v.b)/2;}
 function glideTo(wx,wy,z){if(z)view.z=z;const v=visBox();glide={x:(v.l+v.r)/2-W/2-wx*view.z,y:(v.t+v.b)/2-H/2-wy*view.z};}
 function tileAt(px,py){const[fx,fy]=screenToF(px,py),x=Math.floor(fx),y=Math.floor(fy);return inb(x,y)?idx(x,y):-1;}
 function hoverAt(px,py){
+  if(roadMode()){roadAt(px,py);hideTip();return;}
   if(place){placeAt(px,py);hideTip();return;}
   const i=tileAt(px,py);if(i!==hov){hov=i;}showTip(px,py);
 }
 /* Platzieren: Geist folgt dem Zeiger, das Feld unter dem Zeiger ist die Mitte */
 function placeAt(px,py){const n=fpOf(place.type),[fx,fy]=screenToF(px,py),x0=Math.floor(fx-(n-1)/2),y0=Math.floor(fy-(n-1)/2);
-  const i0=inb(x0,y0)?idx(x0,y0):-1;if(i0!==place.i0){place.i0=i0;place.err=placeErr(place.type,i0);if(!place.err&&!has(B[place.type].cost))place.err='Zu wenig Rohstoffe';if(!place.err&&freeB()<=0)place.err='Kein Baumeister frei';renderPlacebar();}}
+  const i0=inb(x0,y0)?idx(x0,y0):-1;if(i0!==place.i0){place.i0=i0;if(i0>=0&&!place.manual)place.rot=autoRot(place.type,i0,place.rot);place.err=placeErr(place.type,i0);
+    place.noRoad=i0>=0&&!noRoad(place.type)&&!ringTiles(i0,n).some(t=>RCH[t]);if(!place.err&&!has(B[place.type].cost))place.err='Zu wenig Rohstoffe';if(!place.err&&freeB()<=0)place.err='Kein Baumeister frei';renderPlacebar();}}
 function startPlace(type){
-  if(battle)return;selectTile(-1);place={type,i0:-1,err:''};$('#app').classList.add('placing');$('#stage').classList.add('placing');
+  if(battle)return;selectTile(-1);place={type,i0:-1,err:'',rot:defRot(type),manual:false};$('#app').classList.add('placing');$('#stage').classList.add('placing');
   if(mouse.in)placeAt(mouse.x,mouse.y);else{const v=visBox();placeAt((v.l+v.r)/2,(v.t+v.b)/2);}
   renderPlacebar();renderBuild();if(window.innerWidth<900)$('#app').classList.remove('bopen');
+}
+/* Wege ziehen: gedrückt halten und ziehen legt eine Kette, ein Klick ein Feld. lv 0 entfernt Wege. */
+const roadMode=()=>!!place&&place.road!==undefined;
+function startRoad(lv){
+  if(battle)return;selectTile(-1);place={road:lv,a:-1,i0:-1,cells:[],plan:null,err:''};$('#app').classList.add('placing');$('#stage').classList.add('placing');
+  if(mouse.in)roadAt(mouse.x,mouse.y);renderPlacebar();renderBuild();if(window.innerWidth<900)$('#app').classList.remove('bopen');
+}
+function roadAt(px,py){const i=tileAt(px,py);if(i!==place.i0){place.i0=i;roadUpd();}}
+function roadUpd(){
+  const p=place;p.cells=p.a>=0&&p.i0>=0?roadLine(p.a,p.i0):p.i0>=0?[p.i0]:[];p.plan=roadPlan(p.cells,p.road);
+  p.err=!p.cells.length?'':!p.plan.ok.length?(p.plan.err||(p.road?'Hier liegt schon dieser Weg':'Hier ist kein Weg')):p.road&&!has(p.plan.cost)?'Zu wenig Rohstoffe':'';
+  renderPlacebar();
+}
+function roadCommit(){
+  const p=place;if(!roadMode())return;
+  if(p.cells.length&&p.plan&&p.plan.ok.length){const e=buildRoad(p.cells,p.road);if(e)toast(IC('schloss','i24')+e);else{save();renderBuild();}}
+  else if(p.err)toast(IC('schloss','i24')+p.err);
+  p.a=-1;roadUpd();
 }
 function endPlace(){place=null;$('#app').classList.remove('placing');$('#stage').classList.remove('placing');$('#placebar').hidden=true;renderBuild();}
 function selectTile(i){
@@ -82,6 +105,8 @@ document.addEventListener('keydown',e=>{
   if(k==='+'||k==='='){zoomAt(view.z*1.2);return;}
   if(k==='-'){zoomAt(view.z/1.2);return;}
   if(k==='x'&&sel>=0&&S.tiles[sel].b){doDemolish();return;}
+  if(k==='r'){if(place&&!roadMode()){place.rot=(place.rot+1)%4;place.manual=true;renderPlacebar();return;}if(sel>=0&&S.tiles[sel].b){doRotate();return;}}
+  if(k==='p'){startRoad(1);return;}
   if(k==='u'&&sel>=0&&S.tiles[sel].b){doUpgrade();return;}
 });
 document.addEventListener('keyup',e=>KEYS.delete(e.key.toLowerCase()));
@@ -91,7 +116,7 @@ function keyPan(dt){
   if(KEYS.has('a')||KEYS.has('arrowleft'))dx+=1;if(KEYS.has('d')||KEYS.has('arrowright'))dx-=1;
   if(KEYS.has('w')||KEYS.has('arrowup'))dy+=1;if(KEYS.has('s')||KEYS.has('arrowdown'))dy-=1;
   if(!dx&&!dy)return;const sp=720*dt/Math.hypot(dx,dy);view.x+=dx*sp;view.y+=dy*sp;glide=null;
-  if(place&&mouse.in)placeAt(mouse.x,mouse.y);
+  if(place&&mouse.in){if(roadMode())roadAt(mouse.x,mouse.y);else placeAt(mouse.x,mouse.y);}
 }
 /* Tooltip über der Karte */
 function hideTip(){const t=$('#tip');if(!t.hidden)t.hidden=true;}

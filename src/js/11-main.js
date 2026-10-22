@@ -1,11 +1,11 @@
 /* ---------- Aktionen ---------- */
 /* Bauen: zahlen, Fläche belegen, Baustelle starten */
 function tryPlace(keep){
-  if(!place||place.i0<0)return;
+  if(!place||roadMode()||place.i0<0)return;
   if(place.err){toast(IC('schloss','i24')+place.err);return;}
   const k=place.type,i0=place.i0,d=B[k];if(!has(d.cost)||freeB()<=0||placeErr(k,i0))return;
-  pay(d.cost);const b={type:k,lvl:1,prog:0,run:0,until:now()+bTime(k,0)*1000,job:'build'};if(d.rec)b.recipe=d.rec[0];
-  placeB(i0,b);groundDirty(cellsOf(i0,fpOf(k)));anim[i0]=UT;derive();dust(i0);save();
+  pay(d.cost);const b={type:k,lvl:1,prog:0,run:0,until:now()+bTime(k,0)*1000,job:'build',rot:place.rot};if(d.rec)b.recipe=d.rec[0];
+  placeB(i0,b);groundDirty([...cellsOf(i0,fpOf(k)),...ringTiles(i0,fpOf(k))]);anim[i0]=UT;derive();dust(i0);save();
   if(keep&&has(d.cost)&&freeB()>0){place.i0=-1;if(mouse.in)placeAt(mouse.x,mouse.y);renderBuild();refresh();return;}
   endPlace();selectTile(i0);refresh();
 }
@@ -24,7 +24,12 @@ function doDemolish(){
   const i=sel,b=S.tiles[i]&&S.tiles[i].b;if(!b||B[b.type].hidden)return;
   if(!demolishArm){demolishArm=true;inspTab='ausbau';renderSheet();toast(IC('abriss','i24')+'Nochmal bestätigen zum Abreißen');return;}
   const d=B[b.type];for(const k in d.cost)S.res[k]+=Math.floor(d.cost[k]/2);if(b.run&&b.recipe){const r=RECIPES[b.recipe];for(const k in r.in)S.res[k]+=r.in[k];}
-  dust(i);const cells=cellsOf(i,fpOf(b.type));removeB(i);groundDirty(cells);demolishArm=false;sel=-1;derive();renderSheet();save();
+  dust(i);const cells=[...cellsOf(i,fpOf(b.type)),...ringTiles(i,fpOf(b.type))];removeB(i);groundDirty(cells);demolishArm=false;sel=-1;derive();renderSheet();save();
+}
+/* Drehen kostet nichts: die Tür zeigt danach auf die nächste Seite */
+function doRotate(){
+  const i=sel,b=S.tiles[i]&&S.tiles[i].b;if(!b)return;const n=fpOf(b.type);b.rot=(rotOf(b)+1)%4;
+  groundDirty(ringTiles(i,n));derive();renderSheet();save();
 }
 function centerHof(){const[wx,wy]=bPos(S.hof);view.z=isDesk()?1:.8;const v=visBox();view.x=(v.l+v.r)/2-W/2-wx*view.z;view.y=(v.t+v.b)/2-H/2-wy*view.z;glide=null;}
 document.addEventListener('click',e=>{
@@ -42,8 +47,12 @@ document.addEventListener('click',e=>{
     hofup(){doHofUp();},
     bcat(){buildCat=el.dataset.g;$('#build').classList.remove('closed');renderBuild();},
     buildtoggle(){toggleBuild();},
+    road(){const k=+el.dataset.k;if(el.classList.contains('lock'))return;if(roadMode()&&place.road===k){endPlace();return;}startRoad(k);},
+    rotate(){if(place&&!roadMode()){place.rot=(place.rot+1)%4;place.manual=true;renderPlacebar();}else doRotate();},
+    delroad(){if(sel<0)return;const e=buildRoad([sel],0);if(e)toast(IC('schloss','i24')+e);renderSheet();},
     place(){const k=el.dataset.k;if(el.classList.contains('lock'))return;if(place&&place.type===k){endPlace();return;}startPlace(k);},
     endplace(){endPlace();},
+    roadcommit(){roadCommit();},
     doplace(){tryPlace(false);},
     upgrade(){doUpgrade();},
     explore(){const r=+el.dataset.reg,R=REG[r];if(S.explore||!has(R.cost)||freeB()<=0||R.hl>hofL())return;pay(R.cost);S.explore={r,until:now()+R.t*1000};groundDirty();toast(IC('schiff','i24')+R.n+': Expedition aufgebrochen');renderSheet();},
@@ -111,7 +120,7 @@ function boot(){
     if(S.raid.pending&&!battle&&t-S.raid.since>120e3){if(document.visibilityState==='visible'&&$('#modal').hidden)openBattle();else{autoBattle();if(tab==='wehr')render();}}
     if(tab==='handel'&&t>S.boat.until)render();
     document.querySelectorAll('[data-wound]').forEach(el=>{const c=S.crew[+el.dataset.wound];if(c.wounded<=t)render();else el.textContent=fmtT(c.wounded-t);});
-    if(place){const e=placeErr(place.type,place.i0)||(!has(B[place.type].cost)?'Zu wenig Rohstoffe':freeB()<=0?'Kein Baumeister frei':'');if(place.i0>=0&&e!==place.err){place.err=e;renderPlacebar();}}
+    if(place&&!roadMode()){const e=placeErr(place.type,place.i0)||(!has(B[place.type].cost)?'Zu wenig Rohstoffe':freeB()<=0?'Kein Baumeister frei':'');if(place.i0>=0&&e!==place.err){place.err=e;renderPlacebar();}}
     refresh();
   },1000);
   setInterval(save,5000);
@@ -122,4 +131,4 @@ function boot(){
 }
 boot();
 /* Für Tests und Fehlersuche im Browser */
-window.nordhof={get S(){return S;},view,bPos,tilePos,derive,hofUp,placeErr,get W(){return W;},get H(){return H;}};
+window.nordhof={get S(){return S;},view,bPos,tilePos,derive,hofUp,placeErr,get W(){return W;},get H(){return H;},get place(){return place;},freeB,connected,roadF,buildRoad,roadLine,startPlace,startRoad,get vill(){return vill;},groundDirty};

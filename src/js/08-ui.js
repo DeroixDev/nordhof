@@ -79,6 +79,8 @@ function warnings(){
   const out=[];
   if(!FOOD.some(k=>S.res[k]>=1))out.push({key:'hunger',i:-1,img:IC('sauer','i24'),n:'Hunger',why:'Keine Nahrung im Lager. Leute ziehen weg.',act:'tab',t:'dorf'});
   if(D.staff<.999)out.push({key:'staff',i:-1,img:IC('leute','i24'),n:'Zu wenig Leute',why:S.pop.n+' Einwohner für '+D.jobs+' Arbeitsplätze',act:'tab',t:'dorf',mild:1});
+  const nc=BL.filter(i=>!connected(i)&&!(S.tiles[i].b.job==='build'&&busy(S.tiles[i].b)));
+  if(nc.length)out.push({key:'road'+nc.length,i:nc[0],img:'<img src="'+roadThumb(1)+'" alt="">',n:nc.length===1?B[S.tiles[nc[0]].b.type].n+' ohne Weg':nc.length+' Gebäude ohne Weg',why:'Halbe Leistung. Mit einem Weg zum Hof verbinden.'});
   for(const i of BL){const b=S.tiles[i].b;if(busy(b))continue;const d=B[b.type],img='<img src="'+thumb(b.type,b.lvl)+'" alt="">';
     if(d.kind==='craft'){const key=b.recipe||d.rec[0],r=RECIPES[key];if(!b.run){const miss=Object.keys(r.in).filter(k=>(S.res[k]||0)<r.in[k]);if(miss.length)out.push({key:'c'+i,i,img,n:d.n,why:'wartet auf '+miss.map(k=>RES[k].n).join(', ')});else if(capped(key)&&S.res[key]>=D.cap)out.push({key:'f'+i,i,img,n:d.n,why:RES[key].n+': Lager voll',mild:1});}}
     else if(d.kind==='prod'){const a=AREA[i];if(a&&a.f<.5)out.push({key:'a'+i,i,img,n:d.n,why:'nur '+Math.round(a.f*100)+' % Arbeitsfläche',mild:a.f>=.25});
@@ -90,6 +92,7 @@ function warnings(){
 function bStatus(i){
   const b=S.tiles[i].b,d=B[b.type],o=[];
   if(busy(b)){o.push(['uhr',(b.job==='up'?'Ausbau auf Stufe '+(b.lvl+1):'Wird gebaut')+', noch '+fmtDur((b.until-now())/1000),'']);return o;}
+  if(!connected(i))o.push(['pfad','Kein Weg zum Hof: halbe Leistung','bad']);
   if(d.kind==='prod'){const r=prodRate(i);o.push([d.out,'+'+fmtRate(r)+' '+RES[d.out].n,r>0?'good':'bad']);const a=AREA[i];if(a)o.push([ADJICON[d.adj.t]||'wiese','Arbeitsfläche '+Math.round(a.f*100)+' %',a.f<.5?'bad':'']);}
   if(d.kind==='craft'){const key=b.recipe||d.rec[0],r=RECIPES[key],miss=Object.keys(r.in).filter(k=>(S.res[k]||0)<r.in[k]);
     if(!b.run&&miss.length)o.push([miss[0],'wartet auf '+miss.map(k=>RES[k].n).join(', '),'bad']);else o.push([key,'macht '+RES[key].n,'good']);}
@@ -104,6 +107,7 @@ function tipHTML(i){
   const a=anc(i);
   if(a>=0){const b=S.tiles[a].b,d=B[b.type];return '<b>'+d.n+'</b>'+(d.hidden&&b.type!=='hof'?'':' · Stufe '+b.lvl)+bStatus(a).map(s=>'<div class="tr '+s[2]+'">'+IC(s[0],'i16')+s[1]+'</div>').join('');}
   const R=REG[T.r];
+  if(T.rd)return '<b>'+(T.t==='water'?'Brücke · ':'')+ROADS[T.rd].n+'</b><div class="tr">'+IC('pfad','i16')+'Laufen ×'+String(ROADS[T.rd].sp).replace('.',',')+(RCH[i]?'':' · nicht mit dem Hof verbunden')+'</div>';
   if(!unlocked(i))return '<b>'+R.n+'</b><div class="tr">'+IC('schloss','i16')+(R.hl>hofL()?'Erkunden ab Hofstufe '+R.hl:'Antippen zum Erkunden')+'</div>';
   return '<b>'+TERR[T.t].n+'</b><div class="tr">'+IC(R.ic,'i16')+R.n+'</div>';
 }
@@ -129,6 +133,13 @@ function inspHTML(i){
     else h+='<div class="btns"><button class="btn gold wide"'+btnCost(R.cost)+(freeB()>0?'':' data-block="1"')+' data-act="explore" data-reg="'+r+'">'+IC('schiff','i16')+'Erkunden '+costHTML(R.cost)+'<span class="cost">'+IC('uhr','i14')+fmtDur(R.t)+'</span></button></div>'+(freeB()>0?'':'<p class="note">'+IC('arbeit','i14')+' Alle Baumeister sind beschäftigt.</p>');
     return h;
   }
+  if(!T.b&&T.rd){
+    const R=ROADS[T.rd];let h='<div class="ihead"><img class="th" src="'+roadThumb(T.rd)+'" alt=""><div class="t"><h2>'+(T.t==='water'?'Brücke':R.n)+'</h2><p class="sub">'+R.desc+'</p></div>'+close+'</div>';
+    h+='<div class="igrid"><div class="irow">'+IC('pfad','i24')+'<span>Laufen</span><b>×'+String(R.sp).replace('.',',')+'</b></div><div class="irow">'+IC('krone','i24')+'<span>Netz</span><b>'+(RCH[i]?'mit dem Hof verbunden':'nicht verbunden')+'</b></div></div>';
+    const up=[2,3].filter(l=>l>T.rd&&ROADS[l].hl<=hofL());
+    h+='<div class="btns">'+up.map(l=>'<button class="btn gold small" data-act="road" data-k="'+l+'"'+btnCost(ROADS[l].cost)+'>'+IC('hoch','i16')+ROADS[l].n+'</button>').join('')+'<span style="flex:1"></span><button class="btn alt small" data-act="delroad">'+IC('abriss','i16')+'Entfernen</button></div>';
+    return h;
+  }
   if(!T.b){
     const tic={grass:'wiese',forest:'wald',rock:'stein',sand:'duene',tundra:'wald',heide:'heide',moor:'moor',berg:'berg'}[T.t]||'wiese';
     let h='<div class="ihead">'+IC(tic,'i48')+'<div class="t"><h2>'+TERR[T.t].n+'</h2><p class="sub">'+REG[T.r].n+(T.t==='forest'?'. Bauen rodet den Wald.':'')+'</p></div>'+close+'</div>';
@@ -149,6 +160,7 @@ function inspHTML(i){
 }
 function betriebHTML(i){
   const b=S.tiles[i].b,d=B[b.type];let h='';
+  if(!connected(i))h+='<p class="note warn">'+IC('pfad','i16')+' Kein Weg zum Hof. '+(d.kind==='home'?'Nur halb so viele Wohnplätze':d.kind==='joy'?'Keine Wirkung':'Halbe Leistung')+', bis ein Weg anliegt.</p><div class="btns"><button class="btn gold small" data-act="road" data-k="1">'+IC('pfad','i16')+'Pfad legen</button></div>';
   if(d.jobs){const j=jobsOf(b),f=Math.round(j*D.staff);h+='<div class="flow">'+IC('arbeit','i28')+'<div class="workers">'+Array.from({length:j},(_,k)=>'<i class="'+(k<f?'on':'')+'"></i>').join('')+'</div><span class="n">'+f+'/'+j+'</span><span style="flex:1"></span>'+IC(moodKey(),'i24')+'<span class="n">'+Math.round(D.eff*100)+' %</span></div>';}
   if(d.kind==='home')h+='<div class="flow">'+IC('leute','i36')+'<span class="n" style="font-size:18px">+'+(b.type==='hof'?BASEHOUSE+d.cap*b.lvl:d.cap*b.lvl)+'</span><span class="note" style="margin:0">Wohnplätze</span><span style="flex:1"></span><span class="n">'+IC('leute','i16')+'<span data-live="pop"></span>/<span data-live="house"></span></span></div>';
   if(d.kind==='joy')h+='<div class="flow">'+IC('froh','i36')+'<span class="n" style="font-size:18px">+'+d.joy*b.lvl+'</span><span class="note" style="margin:0">Zufriedenheit'+(d.uses?' · braucht '+IC('met','i16'):'')+(d.tax?' · +'+Math.round(d.tax*b.lvl*100)+' % Steuern':'')+'</span></div>';
@@ -188,7 +200,9 @@ function lageHTML(i){
   const a=AREA[i];if(a)h+=row(IC(ADJICON[d.adj.t]||'wiese','i24'),'Arbeitsfläche',a.n+' Felder '+TERR[d.adj.t].n+', davon '+fmtN(a.sh)+' für sich. Braucht '+a.need+' für 100 %.');
   if(d.adj&&d.adj.b){const bo=bonus(i);h+=row('<img class="ico i24" src="'+thumb(d.adj.b)+'" alt="">','Zulieferer',B[d.adj.b].n+' bis 6 Felder entfernt: +'+Math.round(bo*100)+' % (höchstens +'+Math.round(d.adj.max*100)+' %)');}
   if(d.need)h+=row(IC(d.need==='coast'?'wasser':'stein','i24'),'Bauplatz',d.need==='coast'?'an der Küste':d.need==='peak'?'am Gipfel':'am Fels');
+  if(!noRoad(b.type))h+=row(IC('pfad','i24'),'Weg',!connected(i)?'Kein Anschluss: halbe Leistung':HUBD[i]>0?'Laufweg zum nächsten Lager '+fmtN(HUBD[i])+' · Leistung '+Math.round(roadF(i)*100)+' %':'Angeschlossen');
   h+='</div>';
+  h+='<div class="btns"><button class="btn alt small" data-act="rotate" title="Drehen (R)">↻ Drehen</button><span class="note" style="margin:0">Die Tür zeigt zum Weg.</span></div>';
   if(d.ar)h+='<p class="note">Auf der Karte: grüne Felder gehören diesem Betrieb, goldene teilt er mit gleichen Betrieben.</p>';
   return h;
 }
@@ -197,11 +211,15 @@ function lageHTML(i){
 function buildList(cat){const L=hofL();return Object.keys(B).filter(k=>!B[k].hidden&&B[k].g===cat&&B[k].hl<=L+1).sort((a,b)=>B[a].hl-B[b].hl);}
 function renderBuild(){
   const el=$('#build'),L=hofL();if(!el)return;
-  const cats=GROUPS.filter(g=>buildList(g).length);if(!cats.includes(buildCat))buildCat=cats[0];
+  const cats=['Wege',...GROUPS.filter(g=>buildList(g).length)];if(!cats.includes(buildCat))buildCat=cats[1]||cats[0];
   const closed=el.classList.contains('closed')&&isDesk();
-  $('#bcats').innerHTML=(isDesk()?'<button class="tgl" data-act="buildtoggle" title="Bauleiste (B)">'+IC('bauhuette','i16')+(closed?'Bauen':'Zu')+'</button>':'')+cats.map(g=>'<button data-act="bcat" data-g="'+g+'" class="'+(g===buildCat&&!closed?'on':'')+'">'+g+'</button>').join('')+(isDesk()?'<span class="bkey"><kbd>B</kbd> Bauleiste · <kbd>H</kbd> Hof · <kbd>Leertaste</kbd> Pause</span>':'');
+  $('#bcats').innerHTML=(isDesk()?'<button class="tgl" data-act="buildtoggle" title="Bauleiste (B)">'+IC('bauhuette','i16')+(closed?'Bauen':'Zu')+'</button>':'')+cats.map(g=>'<button data-act="bcat" data-g="'+g+'" class="'+(g===buildCat&&!closed?'on':'')+'">'+g+'</button>').join('')+(isDesk()?'<span class="bkey"><kbd>B</kbd> Bauen · <kbd>P</kbd> Pfad · <kbd>R</kbd> Drehen</span>':'');
   if(closed){$('#bcards').innerHTML='';sizeBB();return;}
   const fb=freeB()>0;
+  if(buildCat==='Wege'){$('#bcards').innerHTML=[1,2,3,0].filter(lv=>!lv||ROADS[lv].hl<=L+2).map(lv=>{const R=ROADS[lv],lock=lv&&R.hl>L,on=roadMode()&&place.road===lv;
+      return '<button class="bc'+(lock?' lock':'')+(on?' on':'')+'" data-act="road" data-k="'+lv+'" title="'+esc(lv?R.n+': '+R.desc:'Wege entfernen')+'"><span class="fp">'+(lv?'×'+String(R.sp).replace('.',','):'')+'</span><img class="th" src="'+roadThumb(lv)+'" alt=""><span class="nm">'+(lv?R.n:'Entfernen')+'</span>'+
+        (lock?'<span class="why g">'+IC('krone','i14')+' Hofstufe '+R.hl+'</span>':lv?(Object.keys(R.cost).length?costHTML(R.cost):'<span class="costs"><span class="cost">frei</span></span>')+'<span class="costs" style="opacity:.75"><span class="cost">je Feld</span></span>':'<span class="costs" style="opacity:.75"><span class="cost">'+IC('abriss','i14')+'kostenlos</span></span>')+'</button>';}).join('');
+    sizeBB();refresh();return;}
   $('#bcards').innerHTML=buildList(buildCat).map(k=>{const d=B[k],n=fpOf(k);let why='',cls='bc';
     const regOpen=!d.reg||d.reg.some(g=>S.open.includes(REGI[g]));
     if(d.hl>L){cls+=' lock';why='<span class="why g">'+IC('krone','i14')+' Hofstufe '+d.hl+'</span>';}
@@ -219,12 +237,19 @@ function toggleBuild(){
 }
 function renderPlacebar(){
   const p=$('#placebar');if(!place){p.hidden=true;return;}
+  if(roadMode()){const lv=place.road,pl=place.plan;let st;
+    if(!place.cells.length)st='<small>'+(isDesk()?'Mit gedrückter Maustaste ziehen.':'Mit dem Finger ziehen.')+'</small>';
+    else if(place.err)st='<small class="err">'+place.err+'</small>';
+    else st='<small class="ok">'+pl.ok.length+' Feld'+(pl.ok.length>1?'er':'')+(lv?' · '+(Object.keys(pl.cost).length?costHTML(pl.cost):'kostenlos'):' entfernen')+'</small>';
+    p.innerHTML='<img src="'+roadThumb(lv)+'" alt=""><span class="t"><b>'+(lv?ROADS[lv].n+' legen':'Wege entfernen')+'</b>'+st+'</span><span class="desk lbl" style="white-space:nowrap;text-transform:none;letter-spacing:0;font-weight:600">Ziehen legt · <kbd>Esc</kbd> fertig</span><span class="touch"><button class="btn small gold" data-act="endplace">Fertig</button></span>';
+    p.hidden=false;return;}
   const d=B[place.type];let st;
   if(place.i0<0)st='<small>Zeige auf die Insel.</small>';
   else if(place.err)st='<small class="err">'+place.err+'</small>';
   else if(d.ar){const g=areaGuess(place.type,place.i0);st='<small class="ok">Passt. Arbeitsfläche '+Math.round(g.f*100)+' %</small>';}
   else st='<small class="ok">Passt.</small>';
-  p.innerHTML='<img src="'+thumb(place.type)+'" alt=""><span class="t"><b>'+d.n+' setzen</b>'+st+'</span><span class="desk lbl" style="white-space:nowrap;text-transform:none;letter-spacing:0;font-weight:600">Klick baut · <kbd>Shift</kbd> mehrere · <kbd>Esc</kbd> abbrechen</span><span class="touch"><button class="btn small alt" data-act="endplace">Abbrechen</button><button class="btn small gold" data-act="doplace"'+(place.err||place.i0<0?' data-block="1"':'')+'>Bauen</button></span>';
+  if(place.i0>=0&&!place.err&&place.noRoad)st+='<small class="err" style="color:#E2B04A">Kein Weg: halbe Leistung, bis ein Weg an der Tür liegt.</small>';
+  p.innerHTML='<img src="'+thumb(place.type)+'" alt=""><span class="t"><b>'+d.n+' setzen</b>'+st+'</span><span class="desk lbl" style="white-space:nowrap;text-transform:none;letter-spacing:0;font-weight:600">Klick baut · <kbd>R</kbd> drehen · <kbd>Shift</kbd> mehrere · <kbd>Esc</kbd> abbrechen</span><span class="touch"><button class="btn small alt" data-act="endplace">Abbrechen</button><button class="btn small alt" data-act="rotate" aria-label="Drehen">↻</button><button class="btn small gold" data-act="doplace"'+(place.err||place.i0<0?' data-block="1"':'')+'>Bauen</button></span>';
   p.hidden=false;const db=p.querySelector('[data-act=doplace]');if(db)db.classList.toggle('off',!!(place.err||place.i0<0));
 }
 

@@ -102,7 +102,8 @@ function autoRoads(){
   const hd=doorTile(hof),pass=i=>{const T=S.tiles[i];return T.t!=='water'&&T.t!=='rock'&&T.t!=='berg'&&T.o===undefined;};
   if(hd>=0&&pass(hd))S.tiles[hd].rd=S.tiles[hd].rd||1;
   roadNet();
-  const goal=new Uint8Array(N*N);for(let i=0;i<N*N;i++)if(RCH[i])goal[i]=1;for(const t of ringTiles(hof,fpOf('hof')))if(pass(t))goal[t]=1;
+  /* Ziel ist das Wegenetz an der Hoftür, so entsteht ein zusammenhängendes Netz */
+  const goal=new Uint8Array(N*N);for(let i=0;i<N*N;i++)if(RCH[i])goal[i]=1;if(hd>=0&&pass(hd))goal[hd]=1;if(!goal.some(v=>v))for(const t of ringTiles(hof,fpOf('hof')))if(pass(t))goal[t]=1;
   const list=BL.filter(i=>!noRoad(S.tiles[i].b.type)&&!CONN[i]).sort((a,b)=>{const[hx,hy]=bCtr(hof),[ax,ay]=bCtr(a),[bx,by]=bCtr(b);return Math.hypot(ax-hx,ay-hy)-Math.hypot(bx-hx,by-hy);});
   for(const i of list){const b=S.tiles[i].b,n=fpOf(b.type);
     const prev=new Int32Array(N*N).fill(-2),q=[];let qi=0,hit=-1;

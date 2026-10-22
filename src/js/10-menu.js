@@ -29,7 +29,8 @@ function showMenu(page){
     h=MHEAD('','Statistik','',1)+'<div class="mlist">'+rows.map(r=>'<div class="mrow stat">'+IC(r[0],'i24')+'<span class="ml">'+r[1]+'</span><b>'+r[2]+'</b></div>').join('')+'</div>';
   } else if(mPage==='help'){
     const H=[['Maus','Linke Taste ziehen oder rechte Taste ziehen verschiebt die Karte. Mausrad zoomt dorthin, wo der Zeiger steht. Klick wählt ein Gebäude, Rechtsklick hebt die Auswahl auf.'],
-      ['Tastatur','WASD oder Pfeile schieben, B öffnet die Bauleiste, H den Hof, Leertaste hält an, 1 bis 4 wählt das Tempo, U baut aus, X reißt ab, Esc bricht ab.'],
+      ['Tastatur','WASD oder Pfeile schieben, B öffnet die Bauleiste, H den Hof, Leertaste hält an, 1 bis 4 wählt das Tempo, U baut aus, X reißt ab, R dreht, P legt einen Pfad, Esc bricht ab.'],
+      ['Wege','Unter Bauen, Wege: mit gedrückter Maustaste ziehen. Jedes Gebäude braucht einen Weg zum Hof, sonst arbeitet es nur halb so gut. Die Tür zeigt beim Bauen von selbst zum Weg, R dreht. Schotter und Pflaster machen die Leute schneller, ein Lagerhaus nah an den Betrieben verkürzt ihre Wege.'],
       ['Bauen','Unten ein Gebäude wählen, dann zeigt ein Geist, wo es hinpasst: grün geht, rot nicht, mit Grund. Klick baut, mit Shift mehrere hintereinander. Große Gebäude belegen 2×2 oder 3×3 Felder.'],
       ['Arbeitsfläche','Holzfäller, Steinbruch, Fischer und andere brauchen passenden Boden im Umkreis. Gleiche Betriebe teilen sich überlappende Felder, also lieber verteilen.'],
       ['Hof','Der Häuptlingshof ist wie ein Rathaus. Jede Stufe schaltet Gebäude, Gebiete, Bereiche und ein neues Kapitel frei. Kein Gebäude steht höher als der Hof.'],
