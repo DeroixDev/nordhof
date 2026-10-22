@@ -133,13 +133,13 @@ function derive(){
   reindex();roadNet();logistics();
   let lager=0,hp=0,dmg=0,house=BASEHOUSE,jobs=0,tax=0;const joy={};
   for(const i of BL){const b=S.tiles[i].b;if(b.job==='build'&&busy(b))continue;const d=B[b.type],L=b.lvl;
-    if(d.kind==='store')lager+=L;if(d.kind==='def'){hp+=(d.hp||0)*L;dmg+=(d.dmg||0)*L;}
+    if(d.kind==='store')lager+=L;if(d.kind==='def'&&!b.hurt){hp+=(d.hp||0)*L;dmg+=(d.dmg||0)*L;}
     const ok=connected(i);
     if(d.kind==='home')house+=d.cap*L*(ok?1:.5);jobs+=jobsOf(b);
     if(d.kind==='joy'&&ok){joy[b.type]=(joy[b.type]||0)+L;if(d.tax)tax+=d.tax*L;}}
   D.cap=100+50*(hofL()-1)+150*lager;D.hp=40+hp;D.dmg=4+dmg;D.house=Math.floor(house);D.jobs=jobs;D.joyB=joy;D.tax=tax;
   if(S.pop.n>house)S.pop.n=house;
-  areas();known();mood();villagersFit();
+  areas();known();mood();villagersFit();wallMasks();
 }
 /* Arbeitsbereich: Felder mit dem passenden Boden im Umkreis. Gleiche Betriebe teilen sich überlappende Felder. */
 let AREA={},COVER={};
@@ -203,7 +203,7 @@ function placeErr(type,i0){
     if(T.t==='water')return 'Im Wasser';
     if(!S.open.includes(T.r))return 'Gebiet noch nicht erkundet';
     if(T.o!==undefined)return 'Hier steht schon etwas';
-    if(T.rd)return 'Hier ist ein Weg';
+    if(T.rd&&type!=='tor')return 'Hier ist ein Weg';
     if(T.t==='berg')return 'Zu steil';if(T.t==='rock')return 'Auf Fels kann man nicht bauen';
     if(!coast){const x=c%N,y=(c/N)|0;coast=N4.some(([dx,dy])=>inb(x+dx,y+dy)&&S.tiles[idx(x+dx,y+dy)].t==='water');}}
   const ctr=idx(x0+((s-1)>>1),y0+((s-1)>>1));

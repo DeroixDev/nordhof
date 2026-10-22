@@ -288,8 +288,8 @@ function topH0(st,lv){
   if(st.s==='tower')return st.h+lv*4+20;if(st.s==='temple')return 64;if(st.s==='mine')return st.h+6;
   return {well:18,market:20,kiln:16,hives:12,pit:8,wall:20}[st.s]||8;}
 function drawB(sx,sy,b){
-  const lit=night>.3?1:0,k0='b'+b.type+b.lvl+lit+'r'+rotOf(b),sk=seasonKeyFor(k0,seasonKey(b));
-  blitB(sx,sy,k0+sk,()=>seasonBody(b,lit,sk),fpOf(b.type));
+  const lit=night>.3?1:0,k0='b'+b.type+b.lvl+lit+'r'+rotOf(b)+bKey(b),sk=seasonKeyFor(k0,seasonKey(b));
+  blitB(sx,sy,k0+sk,()=>{seasonBody(b,lit,sk);if(b.hurt&&!isWall(b))sootB();},fpOf(b.type));
   liveB(sx,sy,b);
 }
 /* Mehrfeldrige Gebäude: Häuser wachsen über ihre Maße, alles andere wird gleichmäßig um us vergrößert und in der Fläche um FK gestreckt */
