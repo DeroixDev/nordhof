@@ -42,7 +42,15 @@ Version 0.7 ist für den Desktop gebaut, das Handy läuft mit. Der Spielstand au
 
 - **Gebäude:** Jede Art hat ihre eigene Form (Sägewerk mit Wasserrad, Schmiede mit offener Esse, Bäckerei mit Kuppelofen, Lagerhaus als Scheune und so weiter) und wächst mit den Stufen von Holz über Fachwerk und Stein zur Halle.
 
-Als Nächstes: Felder, die sichtbar wachsen, und Kampf auf der großen Karte.
+## Neu in 0.8
+
+- **Ton** (`12-audio.js`): Umgebung je Biom, Arbeitsgeräusche, Ereignistöne und ruhige Musik, alles per WebAudio erzeugt. Regler im Menü.
+- **Rückmeldung** (`12b-juice.js`): Hüpfen und Staub bei fertigen Bauten, Fest beim Hof-Aufstieg, Zeichen über ruhenden Betrieben mit dem Grund.
+- **Jahreszeiten** (`03s-seasons.js`, `06c-weather.js`): Kalender, Felder wachsen sichtbar und werden im Herbst geerntet, Winter mit Vorratsziel, Schnee, Regen, Nebel.
+- **Story** (`00s-story-data.js`, `08s-story.js`): Szenen mit Figuren und Wahl, Gunst von Björn und Sigrid, der Rivale Jarl Hrafn, 16 Ereignisse, Chronik als Saga.
+- **Kampf** (`09-battle.js`, `09b-defense.js`): Plünderer landen an der Küste und laufen echte Wege, Palisaden und Tore, Verteidiger, Schäden mit Reparatur, Trophäen am Hof.
+
+Der Stand vor 0.8 liegt im Zweig `stand-0.7.4`.
 
 ## Entwicklung
 
