@@ -14,7 +14,7 @@ Object.assign(DRAW,{
 
 /* ---------- Zustand (S.story) ---------- */
 let SC=null,SCT=0;const SNOTE=[];
-const SEAS=['Frühling','Sommer','Herbst','Winter'],ORDW=['','ersten','zweiten','dritten','vierten','fünften','sechsten','siebten','achten','neunten','zehnten','elften','zwölften'];
+const SAGAS=['Frühling','Sommer','Herbst','Winter'],ORDW=['','ersten','zweiten','dritten','vierten','fünften','sechsten','siebten','achten','neunten','zehnten','elften','zwölften'];
 const YEARMS=40*60e3;
 function ST(){if(!S.story)S.story=storyNew();return S.story;}
 function homesDone(){let n=0;for(const i of BL){const b=S.tiles[i].b;if(b.type!=='hof'&&B[b.type].kind==='home'&&!(b.job==='build'&&busy(b)))n++;}return n;}
@@ -43,7 +43,7 @@ function calInfo(){
   return{y,s,cal:!!c};
 }
 const ordY=y=>ORDW[y]||y+'.';
-function sagaSent(e){const d=e.s>=0?'im '+SEAS[e.s]+' des '+ordY(e.y)+' Jahres':'im '+ordY(e.y)+' Jahr';return d[0].toUpperCase()+d.slice(1)+' '+e.x+'.';}
+function sagaSent(e){const d=e.s>=0?'im '+SAGAS[e.s]+' des '+ordY(e.y)+' Jahres':'im '+ordY(e.y)+' Jahr';return d[0].toUpperCase()+d.slice(1)+' '+e.x+'.';}
 function sagaAdd(x,ic){if(!x)return;const st=ST(),d=calInfo();st.saga.push({y:d.y,s:d.s,x,ic:ic||'buch'});if(st.saga.length>200)st.saga.splice(0,st.saga.length-200);}
 
 /* ---------- Gunst und ihre Folgen (Haken in mood, warStats, price) ---------- */
