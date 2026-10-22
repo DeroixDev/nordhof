@@ -184,8 +184,7 @@ const GD={
     tufts(gp(7,t),'rgba(40,60,30,.35)');tufts(gp(7,t),'rgba(70,90,40,.3)');
     ells(gp(3.5,t),1.4,.7,'rgba(90,70,40,.32)');ells(gp(3.5,t),1.4,.7,'rgba(70,100,50,.35)');ells(gp(2,t),.9,.5,'rgba(150,120,70,.35)');},
   rock(t){const r=gR;cracks(gp(2,t),'rgba(60,62,58,.35)');ells(gp(4,t),.9,.55,'rgba(90,92,88,.35)');
-    for(const[x,y]of gp(2.6,t)){const sz=.55+r()*.45,w=9*sz,h=8*sz;
-      ell(x+3,y+1,w*.9,w*.35,SHADOW);ctx.fillStyle='#9A9C96';ctx.beginPath();ctx.moveTo(x-w,y);ctx.lineTo(x-w*.5,y-h);ctx.lineTo(x+w*.2,y-h*1.1);ctx.lineTo(x,y+w*.3);ctx.fill();ctx.fillStyle='#6F716B';ctx.beginPath();ctx.moveTo(x+w*.2,y-h*1.1);ctx.lineTo(x+w,y-h*.2);ctx.lineTo(x+w*.6,y+w*.25);ctx.lineTo(x,y+w*.3);ctx.fill();ctx.fillStyle='rgba(255,255,255,.18)';ctx.beginPath();ctx.moveTo(x-w*.5,y-h);ctx.lineTo(x+w*.2,y-h*1.1);ctx.lineTo(x-w*.1,y-h*.5);ctx.fill();}}
+    for(const[x,y]of gp(2.6,t)){boulder(x,y,.5+r()*.55,r);if(r()<.25)boulder(x+6+r()*4,y+2,.25+r()*.2,r);}}
 };
 const GORD=['sand','berg','tundra','moor','heide','grass','forest','rock'],GHAS=[];
 /* pass: 8 Grundbild, 1 Kante und Hof, 2 Kleinteile, 4 Nebel; ohne Angabe alles. chunk() malt jede Stufe für alle Felder, so schneidet kein Nachbar Kleinteile ab */
@@ -215,6 +214,18 @@ function shoreTile(x,y){
   const[sx,sy]=tilePos(x,y);
   pq(sx,sy+12,[[-.82,-.82,0],[.82,-.82,0],[.82,.82,0],[-.82,.82,0]],'rgba(170,205,200,.28)');
   pq(sx,sy+12,[[-.64,-.64,0],[.64,-.64,0],[.64,.64,0],[-.64,.64,0]],'rgba(240,248,244,.22)');
+}
+/* Findling mit zufälliger Form: rund, flach oder spitz, warme oder kühle Tönung, manchmal Moos */
+const BTONE=[['#9A9C96','#6F716B'],['#A49F93','#78736A'],['#8E958F','#656B66'],['#A9A8A0','#7E7D76']];
+function boulder(x,y,s,r){
+  const k=r(),w=9*s*(k<.25?1.45:k>.85?.8:1),h=8*s*(k<.25?.55:k>.85?1.7:1),[c1,c2]=BTONE[Math.floor(r()*BTONE.length)];
+  const px=x+(r()-.5)*w*.6,py=y-h*(.9+r()*.25),bx=x+(r()-.5)*w*.2,by=y+w*.3,lx=x-w*(.55+r()*.25),ly=y-h*(.45+r()*.35),rx=x+w*(.55+r()*.25),ry=y-h*(.35+r()*.35);
+  ell(x+3,y+1.5,w*.95,w*.36,SHADOW);
+  ctx.fillStyle=c1;ctx.beginPath();ctx.moveTo(x-w,y);ctx.lineTo(lx,ly);ctx.lineTo(px,py);ctx.lineTo(bx,by);ctx.closePath();ctx.fill();
+  ctx.fillStyle=c2;ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(rx,ry);ctx.lineTo(x+w,y-h*.05);ctx.lineTo(x+w*.6,y+w*.25);ctx.lineTo(bx,by);ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.2)';ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(px,py);ctx.lineTo((lx+px+bx)/3,(ly+py+by)/3);ctx.closePath();ctx.fill();
+  if(r()<.3){ctx.fillStyle='rgba(110,135,70,.55)';ctx.beginPath();ctx.ellipse((lx+px)/2,(ly+py)/2+1,w*.3,h*.12,-.4,0,TAU);ctx.fill();}
+  if(r()<.4){ctx.strokeStyle='rgba(40,42,38,.3)';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(px,py+h*.15);ctx.lineTo(px+(r()-.5)*w*.4,py+h*.6);ctx.stroke();}
 }
 /* Bodenkacheln zu 256 Weltpixeln in Bildschirmauflösung; fehlende werden nach und nach gebaut, darunter liegt die Übersicht */
 const GCH=new Map();const CW=256;
