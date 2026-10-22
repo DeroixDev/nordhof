@@ -77,8 +77,7 @@ function drawCart(x,y,v){
   ell(cx,cy+.5,4.5,1.6,'rgba(0,0,0,.16)');ctx.fillStyle='#8A6440';ctx.fillRect(cx-4,cy-5,8,3.4);ctx.fillStyle='#A87C52';ctx.fillRect(cx-4,cy-5.6,8,1);
   ctx.drawImage(iconC(v.carry),cx-3.5,cy-10,7,7);ell(cx-1,cy-1.2,1.8,1.8,'#4A3222');ell(cx-1,cy-1.2,.7,.7,'#C49A62');
 }
-/* Boote, Möwen */
-const gulls=[0,1,2,3].map(()=>({x:rand(0,400),y:rand(20,200),s:rand(18,30),ph:rand(0,TAU),sc:rand(.7,1.1)}));
+/* Boote */
 let tradeA=0;
 function boatAt(gx,gy,ang,kind,t){
   const[sx,sy0]=tilePos(gx,gy);const sy=sy0+Math.sin(t/600+gx)*1.4;
@@ -94,13 +93,21 @@ function boatAt(gx,gy,ang,kind,t){
   ctx.fillStyle=kind==='lang'?'#9A3224':'#5C7246';for(let k=-9;k<9;k+=6)ctx.fillRect(k,-21,3,13);
   ctx.restore();
 }
-function drawGulls(dt){
-  ctx.strokeStyle='rgba(250,250,247,.9)';ctx.lineWidth=1.6;ctx.lineCap='round';
-  for(const g of gulls){
-    g.x+=g.s*dt;g.ph+=dt*7;if(g.x>W+30){g.x=-30;g.y=rand(20,H*.5);}
-    const y=g.y+Math.sin(g.ph*.2)*6,f=Math.sin(g.ph)*3.5*g.sc,w=7*g.sc;
-    ctx.beginPath();ctx.moveTo(g.x-w,y-f);ctx.quadraticCurveTo(g.x-w*.4,y-3,g.x,y);ctx.quadraticCurveTo(g.x+w*.4,y-3,g.x+w,y-f);ctx.stroke();
-  }
+/* Wellen: zwei gekachelte Muster, fest auf der Karte, treiben langsam gegeneinander und atmen in der Helligkeit. Laufen mit der Spieluhr, stehen also in der Pause */
+const WVW=192,WVH=96;let WAVEP=null;
+function waveTex(seed){const c=document.createElement('canvas');c.width=WVW*2;c.height=WVH*2;const g=c.getContext('2d');g.scale(2,2);g.lineCap='round';
+  const r=rng(seed);for(let k=0;k<22;k++){const x=r()*WVW,y=r()*WVH,w=5+r()*9,a=.18+r()*.22;
+    for(const ox of[-WVW,0,WVW])for(const oy of[-WVH,0,WVH]){const px=x+ox,py=y+oy;g.strokeStyle='rgba(255,255,255,'+a+')';g.lineWidth=1+r()*.0;g.beginPath();g.moveTo(px-w,py);g.quadraticCurveTo(px,py-w*.35,px+w,py);g.stroke();
+      if(k%3===0){g.strokeStyle='rgba(40,80,95,'+(a*.5)+')';g.beginPath();g.moveTo(px-w*.8,py+1.6);g.quadraticCurveTo(px,py+1.6-w*.25,px+w*.8,py+1.6);g.stroke();}}}
+  return c;}
+function drawWaves(){
+  if(!WAVEP)WAVEP=[waveTex(17),waveTex(91)].map(c=>ctx.createPattern(c,'repeat'));
+  const z=view.z,k=dpr*z,ox=dpr*(W/2+view.x),oy=dpr*(H/2+view.y),t=T0/1000,fade=Math.min(1,Math.max(0,(z-.3)/.4));if(fade<=0)return;
+  ctx.save();ctx.setTransform(1,0,0,1,0,0);
+  for(let l=0;l<2;l++){const p=WAVEP[l],dx=((l?-3.2:4.5)*t)%WVW,dy=((l?1.1:-.8)*t+(l?WVH/2:0))%WVH;
+    p.setTransform(new DOMMatrix([k/2,0,0,k/2,ox+dx*k,oy+dy*k]));
+    ctx.globalAlpha=fade*(.55+.45*Math.sin(t*.7+l*Math.PI));ctx.fillStyle=p;ctx.fillRect(0,0,cv.width,cv.height);}
+  ctx.restore();
 }
 
 /* ---------- Boden ---------- */
@@ -193,7 +200,7 @@ function groundTile(x,y,pass){
   const[sx,sy]=tilePos(x,y),open=unlocked(i),dep=12,yd=yardOf(i);
   if(pass&8)groundTex([[x,y]]);
   if(pass&1){
-  const wl=!inb(x,y+1)||S.tiles[idx(x,y+1)].t==='water',wr=!inb(x+1,y)||S.tiles[idx(x+1,y)].t==='water';
+  const wl=isSea(x,y+1),wr=isSea(x+1,y);
   if(wl){pq(sx,sy,[[-.5,.5,0],[.5,.5,0],[.5,.5,-dep],[-.5,.5,-dep]],open?'#9C8762':'#6F6450');pq(sx,sy,[[-.5,.5,-dep*.55],[.5,.5,-dep*.55],[.5,.5,-dep],[-.5,.5,-dep]],'rgba(40,30,20,.16)');pl(sx,sy,[-.5,.5,-dep*.3],[.5,.5,-dep*.3],'rgba(255,255,255,.1)',.8);}
   if(wr){pq(sx,sy,[[.5,.5,0],[.5,-.5,0],[.5,-.5,-dep],[.5,.5,-dep]],open?'#7A6A4A':'#5B523F');pq(sx,sy,[[.5,.5,-dep*.55],[.5,-.5,-dep*.55],[.5,-.5,-dep],[.5,.5,-dep]],'rgba(40,30,20,.16)');}
   if(yd)pq(sx,sy,[[-.5,-.5,0],[.5,-.5,0],[.5,.5,0],[-.5,.5,0]],yd);}
@@ -208,9 +215,20 @@ function groundTile(x,y,pass){
     for(const t of GORD)if(GHAS.includes(t))GD[t](t);}}
   if((pass&4)&&!open){const ex=S.explore&&S.explore.r===T.r;pq(sx,sy,[[-.5,-.5,0],[.5,-.5,0],[.5,.5,0],[-.5,.5,0]],ex?'rgba(220,226,226,.22)':'rgba(40,52,58,.28)');pq(sx,sy,[[-.5,-.5,0],[.5,-.5,0],[.5,.5,0],[-.5,.5,0]],'rgba(220,226,226,.16)');}
 }
+/* Binnenseen: Wasser ohne Verbindung zum Meer. Sie liegen auf Bodenhöhe, ohne Klippenkanten */
+let LAKE=null,LAKEW=null;
+function lakes(){if(LAKEW===S.tiles)return LAKE;LAKEW=S.tiles;const sea=new Uint8Array(N*N),st=[];
+  for(let i=0;i<N*N;i++){const x=i%N,y=(i/N)|0;if((x===0||y===0||x===N-1||y===N-1)&&S.tiles[i].t==='water'){sea[i]=1;st.push(i);}}
+  while(st.length){const i=st.pop(),x=i%N,y=(i/N)|0;for(const[dx,dy]of N4){const xx=x+dx,yy=y+dy;if(!inb(xx,yy))continue;const j=idx(xx,yy);if(!sea[j]&&S.tiles[j].t==='water'){sea[j]=1;st.push(j);}}}
+  LAKE=new Uint8Array(N*N);for(let i=0;i<N*N;i++)if(S.tiles[i].t==='water'&&!sea[i])LAKE[i]=1;return LAKE;}
+const isSea=(x,y)=>!inb(x,y)||(S.tiles[idx(x,y)].t==='water'&&!lakes()[idx(x,y)]);
+/* Binnensee: Uferband auf dem Land, dann das Feld ausstanzen. Darunter scheint das Meer mit seinen treibenden Wellen durch */
+function lakeTile(x,y,ps){const[sx,sy]=tilePos(x,y);
+  if(ps===0){pq(sx,sy,[[-.62,-.62,0],[.62,-.62,0],[.62,.62,0],[-.62,.62,0]],'rgba(96,104,80,.35)');pq(sx,sy,[[-.56,-.56,0],[.56,-.56,0],[.56,.56,0],[-.56,.56,0]],'rgba(214,220,200,.45)');}
+  else{const g=ctx.globalCompositeOperation;ctx.globalCompositeOperation='destination-out';pq(sx,sy,[[-.51,-.51,0],[.51,-.51,0],[.51,.51,0],[-.51,.51,0]],'#000');ctx.globalCompositeOperation=g;}}
 function shoreTile(x,y){
   const i=idx(x,y),T=S.tiles[i];if(T.t==='water')return;
-  if(!N8.some(([dx,dy])=>!inb(x+dx,y+dy)||S.tiles[idx(x+dx,y+dy)].t==='water'))return;
+  if(!N8.some(([dx,dy])=>isSea(x+dx,y+dy)))return;
   const[sx,sy]=tilePos(x,y);
   pq(sx,sy+12,[[-.82,-.82,0],[.82,-.82,0],[.82,.82,0],[-.82,.82,0]],'rgba(170,205,200,.28)');
   pq(sx,sy+12,[[-.64,-.64,0],[.64,-.64,0],[.64,.64,0],[-.64,.64,0]],'rgba(240,248,244,.22)');
@@ -236,11 +254,11 @@ function tilesInRect(X0,Y0,X1,Y1){
   return out;
 }
 function chunk(cx,cy,sc){
-  const X0=cx*CW,Y0=cy*CW,list=tilesInRect(X0,Y0,X0+CW,Y0+CW).filter(([x,y])=>S.tiles[idx(x,y)].t!=='water');
-  if(!list.length)return null;
+  const X0=cx*CW,Y0=cy*CW,all=tilesInRect(X0,Y0,X0+CW,Y0+CW),L=lakes(),list=all.filter(([x,y])=>S.tiles[idx(x,y)].t!=='water'),lk=all.filter(([x,y])=>L[idx(x,y)]);
+  if(!list.length&&!lk.length)return null;
   const c=document.createElement('canvas');c.width=Math.ceil(CW*sc)+2;c.height=Math.ceil(CW*sc)+2;
   const keep=ctx;ctx=c.getContext('2d');ctx.setTransform(sc,0,0,sc,1-X0*sc,1-Y0*sc);ctx.lineCap='round';ctx.lineJoin='round';
-  try{for(const[x,y]of list)shoreTile(x,y);groundTex(list);for(const p of[1,2,4])for(const[x,y]of list)groundTile(x,y,p);
+  try{for(const[x,y]of list)shoreTile(x,y);groundTex(list);for(const[x,y]of lk)lakeTile(x,y,0);for(const p of[1,2,4])for(const[x,y]of list)groundTile(x,y,p);for(const[x,y]of lk)lakeTile(x,y,1);
     const rl=list.filter(([x,y])=>S.tiles[idx(x,y)].rd);for(let ps=0;ps<4;ps++)for(const[x,y]of rl)roadTile(x,y,ps);}finally{ctx=keep;}
   return c;
 }
@@ -251,11 +269,11 @@ function buildOverview(){
   if(!TCOL)tileColors();
   const w=ovW(),h=ovH(),c=OV||document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');
   g.setTransform(OVS,0,0,OVS,w/2,ovOY());
-  for(let s=0;s<=2*N-2;s++)for(let x=Math.max(0,s-N+1);x<=Math.min(N-1,s);x++){const y=s-x,i=idx(x,y),T=S.tiles[i];if(T.t==='water')continue;const[sx,sy]=tilePos(x,y);
+  for(let s=0;s<=2*N-2;s++)for(let x=Math.max(0,s-N+1);x<=Math.min(N-1,s);x++){const y=s-x,i=idx(x,y),T=S.tiles[i];if(T.t==='water'){if(lakes()[i]){const[sx,sy]=tilePos(x,y);g.fillStyle='#6F99A3';g.beginPath();g.moveTo(sx-TW/2-1,sy);g.lineTo(sx,sy-TH/2-1);g.lineTo(sx+TW/2+1,sy);g.lineTo(sx,sy+TH/2+1);g.fill();}continue;}const[sx,sy]=tilePos(x,y);
     const yd=yardOf(i),open=unlocked(i);let col=rgb(TCOL[i*3],TCOL[i*3+1],TCOL[i*3+2]);
     if(T.t==='forest')col=rgb(TCOL[i*3]*.72,TCOL[i*3+1]*.8,TCOL[i*3+2]*.72);if(T.t==='berg')col='#B9BCB6';if(yd&&yd[0]==='#')col=yd;
-    if(!inb(x,y+1)||S.tiles[idx(x,y+1)].t==='water'){g.fillStyle=open?'#9C8762':'#6F6450';g.beginPath();g.moveTo(sx-TW/2,sy);g.lineTo(sx,sy+TH/2);g.lineTo(sx,sy+TH/2+12);g.lineTo(sx-TW/2,sy+12);g.fill();}
-    if(!inb(x+1,y)||S.tiles[idx(x+1,y)].t==='water'){g.fillStyle=open?'#7A6A4A':'#5B523F';g.beginPath();g.moveTo(sx+TW/2,sy);g.lineTo(sx,sy+TH/2);g.lineTo(sx,sy+TH/2+12);g.lineTo(sx+TW/2,sy+12);g.fill();}
+    if(isSea(x,y+1)){g.fillStyle=open?'#9C8762':'#6F6450';g.beginPath();g.moveTo(sx-TW/2,sy);g.lineTo(sx,sy+TH/2);g.lineTo(sx,sy+TH/2+12);g.lineTo(sx-TW/2,sy+12);g.fill();}
+    if(isSea(x+1,y)){g.fillStyle=open?'#7A6A4A':'#5B523F';g.beginPath();g.moveTo(sx+TW/2,sy);g.lineTo(sx,sy+TH/2);g.lineTo(sx,sy+TH/2+12);g.lineTo(sx+TW/2,sy+12);g.fill();}
     g.fillStyle=col;g.beginPath();g.moveTo(sx-TW/2-1,sy);g.lineTo(sx,sy-TH/2-1);g.lineTo(sx+TW/2+1,sy);g.lineTo(sx,sy+TH/2+1);g.fill();
     if(yd&&yd[0]!=='#'){g.fillStyle='#8E7B5A';g.fill();}
     if(T.rd){g.fillStyle=ROADS[T.rd].c;g.fill();}
@@ -351,10 +369,10 @@ function draw(ts){
   const dt=Math.min(.05,(ts-lastFrame)/1000||0),gdt=dt*CLK.k;lastFrame=ts;UT=ts;T0+=gdt*1000;
   keyPan(dt);sprFrame();updVill(Math.min(.4,gdt));tradeA+=gdt*.012;
   if(glide){const k=1-Math.exp(-dt*9);view.x+=(glide.x-view.x)*k;view.y+=(glide.y-view.y)*k;if(Math.abs(glide.x-view.x)+Math.abs(glide.y-view.y)<.5)glide=null;}
+  clampView();
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.fillStyle=seaGrad;ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=1.2;ctx.lineCap='round';
-  ctx.beginPath();for(let i=0;i<30;i++){const x=((i*137.5+T0*.006*(i%3+1))%(W+80))-40,y=(i*71.3)%H;ctx.moveTo(x,y);ctx.quadraticCurveTo(x+8,y-3,x+16,y);}ctx.stroke();
+  drawWaves();
   const z=view.z,far=dpr*z<.55;ctx.setTransform(dpr*z,0,0,dpr*z,dpr*(W/2+view.x),dpr*(H/2+view.y));WTK=dpr*z;WTX=dpr*(W/2+view.x);WTY=dpr*(H/2+view.y);
   drawGround();
   drawMarks();
@@ -391,7 +409,6 @@ function draw(ts){
   if(sel>=0&&!place)drawMarker(sel);
   drawParts();
   WTK=0;ctx.setTransform(dpr,0,0,dpr,0,0);
-  drawGulls(gdt);
   if(night>0){ctx.fillStyle='rgba(18,28,58,'+(night*.36)+')';ctx.fillRect(0,0,W,H);}
 }
 /* Zeichen über Gebäuden ohne Weganschluss */

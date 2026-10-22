@@ -11,13 +11,15 @@ cv.addEventListener('pointerdown',e=>{
   cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.offsetX,y:e.offsetY});hideTip();
   if(ptrs.size===1){drag={x:e.offsetX,y:e.offsetY,vx:view.x,vy:view.y,moved:false,btn:e.button,touch:e.pointerType!=='mouse'};
     if(roadMode()&&e.button===0){drag.road=true;place.i0=tileAt(e.offsetX,e.offsetY);place.a=place.i0;roadUpd();}}
-  if(ptrs.size===2){const[a,b]=[...ptrs.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y)||1,z:view.z,mx:(a.x+b.x)/2,my:(a.y+b.y)/2};if(drag){drag.moved=true;if(drag.road){drag.road=false;place.a=-1;roadUpd();}}}
+  if(ptrs.size===2){const[a,b]=[...ptrs.values()],mx=(a.x+b.x)/2,my=(a.y+b.y)/2;pinch={d:Math.hypot(a.x-b.x,a.y-b.y)||1,z:view.z,wx:(mx-W/2-view.x)/view.z,wy:(my-H/2-view.y)/view.z};glide=null;if(drag){drag.moved=true;if(drag.road){drag.road=false;place.a=-1;roadUpd();}}}
 });
 cv.addEventListener('pointermove',e=>{
   if(e.pointerType==='mouse'){mouse.x=e.offsetX;mouse.y=e.offsetY;mouse.in=true;}
   if(ptrs.has(e.pointerId)){
     ptrs.set(e.pointerId,{x:e.offsetX,y:e.offsetY});
-    if(pinch&&ptrs.size===2){const[a,b]=[...ptrs.values()];zoomAt(pinch.z*Math.hypot(a.x-b.x,a.y-b.y)/pinch.d,(a.x+b.x)/2,(a.y+b.y)/2);return;}
+    /* Zwei Finger: der Weltpunkt, der beim Aufsetzen zwischen den Fingern lag, bleibt zwischen ihnen. So zoomt und schiebt man zugleich, ohne Springen */
+    if(pinch&&ptrs.size===2){const[a,b]=[...ptrs.values()],mx=(a.x+b.x)/2,my=(a.y+b.y)/2,nz=Math.max(ZMIN,Math.min(ZMAX,pinch.z*Math.hypot(a.x-b.x,a.y-b.y)/pinch.d));
+      view.z=nz;view.x=mx-W/2-pinch.wx*nz;view.y=my-H/2-pinch.wy*nz;glide=null;return;}
     if(drag&&drag.road){roadAt(e.offsetX,e.offsetY);return;}
     if(drag){const dx=e.offsetX-drag.x,dy=e.offsetY-drag.y;if(Math.abs(dx)+Math.abs(dy)>(drag.touch?8:4)){drag.moved=true;glide=null;$('#stage').classList.add('panning');}
       if(drag.moved){view.x=drag.vx+dx;view.y=drag.vy+dy;}}
@@ -27,7 +29,10 @@ cv.addEventListener('pointermove',e=>{
 });
 cv.addEventListener('pointerleave',()=>{mouse.in=false;if(!ptrs.size){hov=-1;hideTip();}});
 cv.addEventListener('pointerup',e=>{
-  const d=drag;ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;
+  const d=drag;ptrs.delete(e.pointerId);
+  /* Hebt man einen von zwei Fingern, schiebt der übrige ab hier weiter: Startpunkt und Ansicht neu setzen, sonst springt die Karte zurück */
+  if(pinch&&ptrs.size<2){pinch=null;if(ptrs.size===1&&drag){const[q]=[...ptrs.values()];drag.x=q.x;drag.y=q.y;drag.vx=view.x;drag.vy=view.y;drag.moved=true;}}
+  else if(ptrs.size<2)pinch=null;
   if(ptrs.size===0){drag=null;$('#stage').classList.remove('panning');}
   if(d&&d.road){roadCommit();return;}
   if(!d||d.moved||ptrs.size)return;
@@ -36,12 +41,15 @@ cv.addEventListener('pointerup',e=>{
   if(place){placeAt(e.offsetX,e.offsetY);if(d.touch){renderPlacebar();return;}tryPlace(e.shiftKey);return;}
   selectTile(tileAt(e.offsetX,e.offsetY));
 });
-cv.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);drag=null;pinch=null;$('#stage').classList.remove('panning');});
+cv.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);if(ptrs.size===1&&drag){const[q]=[...ptrs.values()];drag.x=q.x;drag.y=q.y;drag.vx=view.x;drag.vy=view.y;drag.moved=true;}else drag=null;pinch=null;$('#stage').classList.remove('panning');});
 cv.addEventListener('wheel',e=>{e.preventDefault();const f=Math.exp(-Math.max(-60,Math.min(60,e.deltaY*(e.deltaMode?16:1)))*.0022);zoomAt(view.z*f,e.offsetX,e.offsetY);},{passive:false});
 /* Zoomen, der Punkt unter dem Zeiger bleibt stehen */
 function zoomAt(z,px,py){const nz=Math.max(ZMIN,Math.min(ZMAX,z));if(px===undefined){px=visCX();py=visCY();}
   const wx=(px-W/2-view.x)/view.z,wy=(py-H/2-view.y)/view.z;view.x=px-W/2-wx*nz;view.y=py-H/2-wy*nz;view.z=nz;glide=null;}
 function zoomTo(z){zoomAt(z);}
+/* Die Bildmitte bleibt über der Insel: liegt sie außerhalb der Karten-Raute, wird sie an deren Rand zurückgeschoben */
+function clampView(){const v=visBox(),cx=(v.l+v.r)/2,cy=(v.t+v.b)/2,z=view.z,wx=(cx-W/2-view.x)/z,wy=(cy-H/2-view.y)/z,a=N*TW/2*.92,b=N*TH/2*.92,k=Math.abs(wx)/a+Math.abs(wy)/b;
+  if(k<=1)return;const nx=wx/k,ny=wy/k;view.x=cx-W/2-nx*z;view.y=cy-H/2-ny*z;}
 /* Freie Kartenmitte zwischen den Tafeln */
 function visBox(){const cs=getComputedStyle($('#app')),l=parseFloat(cs.getPropertyValue('--lw'))||0,r=parseFloat(cs.getPropertyValue('--rw'))||0,t=parseFloat(cs.getPropertyValue('--tb'))||0,bt=(parseFloat(cs.getPropertyValue('--nav'))||0)+(parseFloat(cs.getPropertyValue('--bb'))||0);return{l,r:W-r,t,b:H-bt};}
 function visCX(){const v=visBox();return(v.l+v.r)/2;}

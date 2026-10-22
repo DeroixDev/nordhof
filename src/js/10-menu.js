@@ -1,5 +1,5 @@
 /* ---------- Menü ---------- */
-const VERSION='0.7.3';
+const VERSION='0.7.4';
 const MROW=(act,ic,label,extra,cls)=>'<button class="mrow'+(cls?' '+cls:'')+'" data-act="'+act+'"'+(extra||'')+'>'+IC(ic,'i24')+'<span class="ml">'+label+'</span><span class="chev"></span></button>';
 const MHEAD=(ic,title,sub,back)=>'<div class="head">'+(back?'<button class="x back" data-act="mpage" data-p="main" aria-label="Zurück"></button>':IC(ic,'i48'))+'<div class="t"><h2>'+title+'</h2>'+(sub?'<p class="sub">'+sub+'</p>':'')+'</div><button class="x" data-act="closemodal" aria-label="Schließen"></button></div>';
 const TOG=(key,label,ic)=>'<div class="switch"><span class="n">'+IC(ic,'i24')+label+'</span><button class="btn small '+(S.opt[key]?'':'alt')+'" data-act="opt" data-k="'+key+'">'+(S.opt[key]?'An':'Aus')+'</button></div>';
