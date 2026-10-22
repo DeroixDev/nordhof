@@ -288,7 +288,7 @@ function topH0(st,lv){
   return {well:18,market:20,kiln:16,hives:12,pit:8,wall:20}[st.s]||8;}
 function drawB(sx,sy,b){
   const lit=night>.3?1:0;
-  blitB(sx,sy,'b'+b.type+b.lvl+lit+'r'+rotOf(b),()=>bodyB(0,0,b,lit),fpOf(b.type));
+  blitB(sx,sy,'b'+b.type+b.lvl+lit+'r'+rotOf(b)+bKey(b),()=>{bodyB(0,0,b,lit);if(b.hurt&&!isWall(b))sootB();},fpOf(b.type));
   liveB(sx,sy,b);
 }
 /* Mehrfeldrige Gebäude: Häuser wachsen über ihre Maße, alles andere wird gleichmäßig um us vergrößert und in der Fläche um FK gestreckt */

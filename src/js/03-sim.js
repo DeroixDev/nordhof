@@ -7,7 +7,7 @@ function use(k,a){const v=Math.min(a,S.res[k]||0);S.res[k]-=v;ACC.c[k]=(ACC.c[k]
 function tick(dt){
   finishJobs();mood();logistics();
   for(const i of BL){
-    const b=S.tiles[i].b;if(busy(b))continue;const d=B[b.type];
+    const b=S.tiles[i].b;if(busy(b)||b.hurt)continue;const d=B[b.type];
     if(d.kind==='prod'){toBuf(b,prodRate(i)*dt);const got=haul(i,d.out,dt);if(LIVE&&got>0)popAcc[i]=(popAcc[i]||Math.random()*2)+got;continue;}
     if((d.kind==='joy'||d.kind==='trans')&&d.uses){for(const k in d.uses)use(k,d.uses[k]*b.lvl*dt);continue;}
     if(d.kind!=='craft')continue;
@@ -49,9 +49,9 @@ function raidOutcome(win){
   return out;
 }
 function autoBattle(){
-  const R=raiders(S.raid.n);let ih=D.hp,rh=R.hp,g=0;
-  while(ih>0&&rh>0&&g++<200){rh-=D.dmg*rand(.85,1.15);if(rh<=0)break;ih-=R.dmg*rand(.85,1.15);}
-  return raidOutcome(rh<=0);
+  const R=raiders(S.raid.n),P=defPow();let ih=D.hp+P.hp,rh=R.hp,g=0;
+  while(ih>0&&rh>0&&g++<200){rh-=(D.dmg+P.dmg)*rand(.85,1.15);if(rh<=0)break;ih-=R.dmg*rand(.85,1.15);}
+  const o=raidOutcome(rh<=0);if(!o.win)raidHurt();return o;
 }
 function catchUp(ms){
   const before={...S.res},raids=[];let t=S.t;const end=S.t+Math.min(ms,8*3600e3);

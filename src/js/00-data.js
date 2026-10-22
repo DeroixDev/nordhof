@@ -58,6 +58,7 @@ const B={
   stellmacher:{n:'Stellmacher',sz:2,hl:2,g:'Wehr & Lager',kind:'trans',tl:1,jobs:2,max:1,cost:{holz:40,bretter:20},st:{s:'house',ex:.32,ey:.22,h:10,rh:11,ax:'x',wall:'#B58A5A',roof:'#6E4A2E',mat:'wood',prop:'planks'}},
   ochsenstall:{n:'Ochsenstall',sz:3,hl:3,g:'Wehr & Lager',kind:'trans',tl:2,jobs:2,max:1,uses:{weizen:.02},cost:{bretter:40,stein:30,muenzen:120},st:{s:'pasture',animal:'ochse'}},
   palisade:{n:'Palisade',sz:1,hl:1,g:'Wehr & Lager',kind:'def',hp:25,cost:{holz:40},st:{s:'wall'}},
+  tor:{n:'Tor',sz:1,hl:1,g:'Wehr & Lager',kind:'def',hp:40,cost:{holz:40,stein:15},st:{s:'wall'}},
   turm:{n:'Wachturm',sz:1,hl:3,g:'Wehr & Lager',kind:'def',dmg:4,cost:{bretter:20,stein:30},st:{s:'tower',h:40,f:.36,body:'#8B8F8A',roof:'#9A3224'}},
   bogenposten:{n:'Bogenposten',sz:1,hl:2,g:'Wehr & Lager',kind:'def',dmg:3,hp:5,cost:{bretter:20,eisen:5},st:{s:'tower',h:24,f:.42,body:'#9C7A52',roof:'#5C7246'}}
 };
@@ -119,8 +120,9 @@ const DESC={
   bauhuette:'Hier wohnt ein weiterer Baumeister. Jeder Baumeister kann gleichzeitig ein Gebäude bauen oder ausbauen.',
   silbermine:'Schürft Silber aus den Gipfeln. Muss an einen Gipfel grenzen.',
   sammler:'Sammelt Bernstein, den die Brandung an den Strand spült.',
-  palisade:'Holzwall gegen Plünderer. Mehr Lebenspunkte für die Insel.',
-  turm:'Bogenschützen auf dem Turm treffen hart.',
+  palisade:'Holzwall gegen Plünderer. Sie müssen ihn einreißen oder außen herum gehen. Verbindet sich mit Nachbarn und Türmen.',
+  tor:'Tor in der Palisade. Dorfbewohner und Verteidiger gehen hindurch, Plünderer nicht. Darf auf einem Weg stehen.',
+  turm:'Bogenschützen auf dem Turm treffen hart. Im Kampf zieht eine Wache los, ab Stufe 4 zwei.',
   bogenposten:'Kleiner Posten mit etwas Schutz und Schaden.'
 };
 const RDESC={

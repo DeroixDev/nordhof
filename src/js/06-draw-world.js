@@ -36,6 +36,7 @@ function routeOf(a,b){
 function updVill(dt){
   if(dt<=0)return;let ws=null;
   for(const v of vill){
+    if(battle&&fleeV(v))continue;
     if(v.k>=v.path.length){
       v.wait-=dt;if(v.wait>0)continue;
       ws=ws||walkable();if(!ws.length)continue;
@@ -328,7 +329,7 @@ function drawMarks(){
     if(!place.cells.length&&hov>=0)tileFill(hov,'rgba(255,248,230,.25)');
     for(const i of BL)if(!connected(i)){const n=fpOf(S.tiles[i].b.type);fpPath(i%N,(i/N)|0,n,.04);ctx.save();ctx.setLineDash([5,4]);ctx.strokeStyle='#F2B3A4';ctx.lineWidth=1.6;ctx.stroke();ctx.restore();}
     return;}
-  const pl0=place&&place.i0>=0;
+  const pl0=place&&place.i0>=0;if(pl0)placeRange();
   if(battle){if(!battle.done)for(const i of BL)if(RANGE[S.tiles[i].b.type])drawRange(i,.35);}
   else if(sel>=0&&S.tiles[sel].b&&!pl0){const b=S.tiles[sel].b,n=fpOf(b.type);
     if(RANGE[b.type])drawRange(sel,1);
@@ -384,8 +385,7 @@ function draw(ts){
   const ent=(x,y,d,f)=>{const rx=Math.round(x),ry=Math.round(y);ents.push({d,f,t:inb(rx,ry)?idx(rx,ry):-1});};
   for(const v of vill)ent(v.x,v.y,v.x+v.y+.05,()=>drawVill(v));
   {const gx=IC0+50*Math.cos(tradeA),gy=IC0+50*Math.sin(tradeA);ent(gx,gy,gx+gy,()=>boatAt(gx,gy,tradeA+Math.PI/2,'knarr',ts));}
-  if(battle){for(const r of battle.rs)ent(r.x,r.y,r.x+r.y+.1,()=>drawRaider(r));for(const l of battle.L)ent(l.bx,l.by,l.bx+l.by,()=>boatAt(l.bx,l.by,l.a+Math.PI,'lang',ts));}
-  else if(S.raid.pending){const k=Math.min(1,(now()-S.raid.since)/15000);for(const l of landingPoints()){const gx=l.bx+l.dx*(1-k)*6,gy=l.by+l.dy*(1-k)*6;ent(gx,gy,gx+gy,()=>boatAt(gx,gy,l.a+Math.PI,'lang',ts));}}
+  defEnts(ent,ts);
   ents.sort((a,b)=>a.d-b.d);
   const drawn=new Set(),pend=new Map();
   const wait=(o,it)=>{let p=pend.get(o);if(!p)pend.set(o,p=[]);p.push(it);};
@@ -405,7 +405,7 @@ function draw(ts){
   while(e<ents.length)run(ents[e++]);
   for(const p of pend.values())p.forEach(run);
   if(place&&!roadMode()&&place.i0>=0){const n=fpOf(place.type),x0=place.i0%N,y0=(place.i0/N)|0,[gx,gy]=tilePos(x0+(n-1)/2,y0+(n-1)/2);ctx.globalAlpha=place.err?.45:.72;const gb={type:place.type,lvl:1,run:0,rot:place.rot};blitB(gx,gy,'b'+place.type+'10r'+gb.rot,()=>bodyB(0,0,gb,0),n);ctx.globalAlpha=1;}
-  if(battle)drawBattleTop();
+  defTop();
   if(sel>=0&&!place)drawMarker(sel);
   drawParts();
   WTK=0;ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -445,7 +445,7 @@ function screenToTile(px,py){
 let fpsN=0,fpsT=0;
 function loop(ts){
   if(tab==='insel')draw(ts);else lastFrame=ts;
-  if(battle){battleStep(Math.min(.05,(ts-(loop.lt||ts))/1000)*CLK.k);updBattleHud();}loop.lt=ts;
+  defLoop(Math.min(.05,(ts-(loop.lt||ts))/1000));loop.lt=ts;
   if(MINI.on)drawMini(ts);
   if(S.opt.fps){fpsN++;if(ts-fpsT>500){$('#fps').textContent=Math.round(fpsN*1000/(ts-fpsT))+' fps';fpsN=0;fpsT=ts;}}
   requestAnimationFrame(loop);

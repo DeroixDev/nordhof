@@ -66,6 +66,7 @@ document.addEventListener('click',e=>{
     defend(){openBattle();},
     fire(){if(battle&&battle.fire&&!battle.done){battle.fire=0;battle.boost=battle.t+6;toast(IC('feuer','i24')+'Brandpfeile!');}},
     closebattle(){closeBattle();},
+    repair(){doRepair(+el.dataset.i);renderSheet();},repairall(){repairAll();render();},
     closemodal(){closeModal();},
     mpage(){showMenu(el.dataset.p);},
     goto(){const i=+el.dataset.i;if(tab!=='insel')setTab('insel');selectTile(i);const[wx,wy]=posOf(i);glideTo(wx,wy);},
@@ -116,8 +117,8 @@ function boot(){
     if(dt>60){const r=catchUp(t-S.t);if(S.chapPending){const L=S.chapPending;delete S.chapPending;showChapter(L);}else if(Object.keys(r.gain).length||r.raids.length||r.done.length||r.regs.length)showReport(r);}
     else{LIVE=true;tick(dt);LIVE=false;S.t=t;}
     for(const i in popAcc){const T=S.tiles[i],k=T.b&&outOf(T.b);if(!k){delete popAcc[i];continue;}if(popAcc[i]>=3){const n=Math.floor(popAcc[i]);popAt(+i,k,n);popAcc[i]-=n;}}
-    if(S.raid.next&&!S.raid.pending&&t>=S.raid.next&&!S.run){S.raid.pending=true;S.raid.since=t;toast(IC('schiff','i24')+'Plünderer in Sicht!');if(tab==='wehr')render();}
-    if(S.raid.pending&&!battle&&t-S.raid.since>120e3){if(document.visibilityState==='visible'&&$('#modal').hidden)openBattle();else{autoBattle();if(tab==='wehr')render();}}
+    if(S.raid.next&&!S.raid.pending&&t>=S.raid.next&&!S.run){S.raid.pending=true;S.raid.since=t;raidAnnounce();if(tab==='wehr')render();}
+    if(S.raid.pending&&!battle&&t-S.raid.since>120e3){if(document.visibilityState==='visible'&&$('#modal').hidden)openBattle(1);else{autoBattle();if(tab==='wehr')render();}}
     if(tab==='handel'&&t>S.boat.until)render();
     document.querySelectorAll('[data-wound]').forEach(el=>{const c=S.crew[+el.dataset.wound];if(c.wounded<=t)render();else el.textContent=fmtT(c.wounded-t);});
     if(place&&!roadMode()){const e=placeErr(place.type,place.i0)||(!has(B[place.type].cost)?'Zu wenig Rohstoffe':freeB()<=0?'Kein Baumeister frei':'');if(place.i0>=0&&e!==place.err){place.err=e;renderPlacebar();}}

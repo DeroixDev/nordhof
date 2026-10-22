@@ -97,7 +97,8 @@ const DRAW={
   karren(g){P(g,[-34,-6,22,-6,26,14,-30,14],'#A87C52');RR(g,-34,-12,58,8,3,'#C49A62');L(g,[22,0,44,-18],'#7A4E2C',5);E(g,-8,20,13,13,'#5A3B24');E(g,-8,20,5,5,'#C49A62');P(g,[-28,-12,-20,-26,-6,-14],'#E2B94B',false);E(g,8,-16,10,7,'#D59B4B',false);},
   ochse(g){E(g,0,6,26,22,'#8A5A32');E(g,0,20,14,10,'#C49A7A');E(g,-6,18,2.5,2,'#3B3532',false);E(g,6,18,2.5,2,'#3B3532',false);E(g,-10,0,4,4,'#1E2426',false);E(g,10,0,4,4,'#1E2426',false);
     g.beginPath();g.moveTo(-20,-10);g.quadraticCurveTo(-40,-14,-38,-34);g.quadraticCurveTo(-30,-18,-14,-16);g.closePath();fs(g,'#EDE6D6');g.beginPath();g.moveTo(20,-10);g.quadraticCurveTo(40,-14,38,-34);g.quadraticCurveTo(30,-18,14,-16);g.closePath();fs(g,'#EDE6D6');},
-  info(g){E(g,0,0,34,34,'#3F5E6B');E(g,0,-16,5,5,'#fff',false);RR(g,-5,-6,10,28,4,'#fff',false);}
+  info(g){E(g,0,0,34,34,'#3F5E6B');E(g,0,-16,5,5,'#fff',false);RR(g,-5,-6,10,28,4,'#fff',false);},
+  horn(g){g.beginPath();g.moveTo(-38,-26);g.quadraticCurveTo(-30,24,30,30);g.lineTo(36,16);g.quadraticCurveTo(-12,10,-20,-34);g.closePath();fs(g,'#E9DCC0');for(const[a,b,c,d]of[[-31,-6,-16,-12],[-12,16,0,6],[14,26,20,13]])L(g,[a,b,c,d],'#C4862A',5);E(g,-29,-30,10,5,'#D8C7A2');E(g,-29,-30,6,2.6,'#5A4A3A',false);RR(g,28,14,10,18,3,'#8A5A32');}
 
 };
 const ICON={},ICONC={};

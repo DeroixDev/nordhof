@@ -155,6 +155,7 @@ function inspHTML(i){
       (b.job==='up'?'<p class="note">'+IC('uhr','i14')+' Während des Ausbaus ruht der Betrieb.</p>':'')+
       '<div class="btns"><button class="btn gold wide" data-act="rush" data-rush="'+i+'">'+IC('muenzen','i16')+'Sofort fertig <span data-rushc="'+i+'"></span></button></div>';
   }
+  if(b.hurt)h+=repairHTML(i);
   h+='<div class="itabs">'+[['betrieb','Betrieb'],['ausbau','Ausbau'],['lage','Lage']].map(([k,n])=>'<button data-act="itab" data-k="'+k+'" class="'+(inspTab===k?'on':'')+'">'+n+'</button>').join('')+'</div>';
   if(inspTab==='betrieb')h+=betriebHTML(i);else if(inspTab==='ausbau')h+=ausbauHTML(i);else h+=lageHTML(i);
   return h;
@@ -491,7 +492,7 @@ $('#mcv').addEventListener('pointerdown',e=>{
 });
 
 function price(k){return RES[k].p*(k===S.boat.k?2:1);}
-function chanceQ(){const R=raiders(S.raid.n);return Math.ceil(D.hp/R.dmg)/Math.ceil(R.hp/D.dmg);}
+function chanceQ(){const R=raiders(S.raid.n),P=defPow();return Math.ceil((D.hp+P.hp)/R.dmg)/Math.ceil(R.hp/(D.dmg+P.dmg));}
 function panelWehr(){
   const R=raiders(S.raid.n),q=chanceQ(),pos=Math.max(4,Math.min(96,(q-.5)/1.2*100));
   let h=PT(IC('schild','i48'),'Wehr','Plünderer landen an der Küste. Türme schießen, Palisaden halten auf.');
