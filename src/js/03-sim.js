@@ -6,18 +6,18 @@ function gain(k,a){const b=S.res[k]||0;add(k,a);const d=Math.max(0,S.res[k]-b);A
 function use(k,a){const v=Math.min(a,S.res[k]||0);S.res[k]-=v;ACC.c[k]=(ACC.c[k]||0)+v;return v;}
 function tick(dt){
   finishJobs();mood();
-  S.tiles.forEach((T,i)=>{
-    const b=T.b;if(!b||busy(b))return;const d=B[b.type];
-    if(d.kind==='prod'){const a=prodRate(i)*dt,got=gain(d.out,a);if(LIVE&&got>0)popAcc[i]=(popAcc[i]||Math.random()*2)+got;return;}
-    if(d.kind==='joy'&&d.uses){for(const k in d.uses)use(k,d.uses[k]*b.lvl*dt);return;}
-    if(d.kind!=='craft')return;
+  for(const i of BL){
+    const b=S.tiles[i].b;if(busy(b))continue;const d=B[b.type];
+    if(d.kind==='prod'){const a=prodRate(i)*dt,got=gain(d.out,a);if(LIVE&&got>0)popAcc[i]=(popAcc[i]||Math.random()*2)+got;continue;}
+    if(d.kind==='joy'&&d.uses){for(const k in d.uses)use(k,d.uses[k]*b.lvl*dt);continue;}
+    if(d.kind!=='craft')continue;
     const key=b.recipe||d.rec[0],r=RECIPES[key];let time=dt*craftSpeed(i),guard=0;
     while(time>0&&guard++<500){
       if(!b.run){if(has(r.in)&&!(capped(key)&&S.res[key]>=D.cap)){for(const k in r.in)use(k,r.in[k]);b.run=1;}else break;}
       const need=r.t-b.prog;
       if(time>=need){time-=need;b.prog=0;b.run=0;gain(key,r.out);if(LIVE)popAt(i,key,r.out);}else{b.prog+=time;time=0;}
     }
-  });
+  }
   people(dt);
   const a=1-Math.exp(-dt/20);
   for(const k in RES){FLOW.p[k]=(FLOW.p[k]||0)*(1-a)+(ACC.p[k]||0)/dt*a;FLOW.c[k]=(FLOW.c[k]||0)*(1-a)+(ACC.c[k]||0)/dt*a;}
@@ -57,21 +57,21 @@ function catchUp(ms){
   LIVE=false;REPORT={done:[],reg:[]};
   while(t<end){
     const step=Math.min(5000,end-t);S._simT=t;tick(step/1000);t+=step;
-    if(!raids.length&&t>=S.raid.next&&!S.run){S._simT=S.raid.next;raids.push(autoBattle());}
+    if(!raids.length&&S.raid.next&&t>=S.raid.next&&!S.run){S._simT=S.raid.next;raids.push(autoBattle());}
   }
   S._simT=0;S.t=now();finishJobs();const done=REPORT.done,regs=REPORT.reg;REPORT=null;
-  if(S.raid.next<S.t+60e3)S.raid.next=S.t+5*60e3;
+  if(S.raid.next&&S.raid.next<S.t+60e3)S.raid.next=S.t+5*60e3;
   const gain={};for(const k in RES){const d=Math.floor(S.res[k]-before[k]);if(d)gain[k]=d;}
   return{ms,gain,raids,done,regs};
 }
 function rollBoat(){const ks=Object.keys(RES).filter(k=>capped(k));S.boat={k:pick(ks),until:now()+10*60e3};}
 function producible(){
   const set=new Set(['holz']);
-  for(const T of S.tiles){if(!T.b)continue;const d=B[T.b.type];if(d.out)set.add(d.out);if(d.rec)d.rec.forEach(r=>set.add(r));}
+  for(const i of BL){const d=B[S.tiles[i].b.type];if(d.out)set.add(d.out);if(d.rec)d.rec.forEach(r=>set.add(r));}
   return [...set].filter(k=>k!=='waffe'&&k!=='ruestung');
 }
 function newOrder(){
-  const k=pick(producible()),kind=RES[k].k;
+  const k=pick(producible().filter(x=>KNOWN.has(x))),kind=RES[k].k;
   const amt=kind==='roh'?10*Math.floor(rand(3,8)):kind==='ware'?5*Math.floor(rand(1,5)):Math.floor(rand(2,5));
   return{k,a:amt,rew:Math.round(RES[k].p*amt*1.8+10),who:pick(['haendler','dorf','jarl'])};
 }

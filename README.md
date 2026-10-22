@@ -22,28 +22,29 @@ Mit kostenloser Apple-ID sind höchstens 3 selbst installierte Apps gleichzeitig
 
 Die Signatur läuft nach 7 Tagen ab. iPhone anschließen und „Nordhof aktualisieren.command“ doppelklicken. Der Spielstand bleibt erhalten.
 
-## So läuft das Spiel
+## So läuft das Spiel (0.7)
 
-- **Insel:** Feld antippen, bauen. Lage zählt: Holzfäller neben Wald, Bäckerei neben Feldern, Schmiede neben Schmelze geben Bonus.
-- **Gebiete:** Um das Heimatland liegen Nordwald, Heide, Moor, Gebirge und Dünen. Jedes wird mit Rohstoffen, Zeit und genug Einwohnern erkundet und hat eigene Funde und Gebäude: Jäger nur im Nordwald, Imker in der Heide, Lehm und Flachs im Moor, Erz und Silber im Gebirge, Bernstein an den Dünen.
-- **Bauzeiten:** Bauen, Ausbauen und Erkunden dauert, von Sekunden bis Stunden. Jeder Auftrag braucht einen freien Baumeister. Am Anfang gibt es 2, jede Bauhütte bringt einen weiteren (höchstens 5). Mit Münzen geht es sofort.
+Version 0.7 ist für den Desktop gebaut, das Handy läuft mit. Der Spielstand aus 0.6 passt nicht auf die neue Karte und bleibt unangetastet gespeichert.
+
+- **Karte:** 96 × 96 Felder statt 29 × 29. In der Mitte das Heimatland, drumherum Nordwald, Heide, Marsch, Bergland und Dünenküste mit Flüssen und Seen. Weit herausgezoomt zeigt eine Übersicht die ganze Insel, unten rechts liegt die Minikarte.
+- **Steuerung:** Linke oder rechte Maustaste ziehen verschiebt, Mausrad zoomt zum Zeiger, WASD und Pfeile schieben. B Bauleiste, H Hof, Leertaste Pause, 1 bis 4 Tempo, U Ausbau, X Abriss, Esc bricht ab.
+- **Bauen:** Unten ein Gebäude wählen, ein Geist zeigt, wo es passt (grün) oder warum nicht (rot). Klick baut, Shift baut mehrere. Gebäude haben Grundflächen von 1 × 1 bis 3 × 3.
+- **Arbeitsfläche:** Holzfäller, Steinbruch, Fischer, Jäger, Imker und Weiden brauchen passenden Boden im Umkreis. Gleiche Betriebe teilen sich überlappende Felder. Werkstätten bekommen Bonus durch Zulieferer bis 6 Felder entfernt.
+- **Hof:** Der Häuptlingshof ist das Rathaus. Jede der 8 Hofstufen schaltet Gebäude, Gebiete, Bereiche und ein Kapitel der Geschichte frei. Kein Gebäude steht höher als der Hof. Es geht los mit einem Minidorf, ohne Tutorial. Überfälle beginnen ab Hofstufe 2.
+- **Oberfläche:** Oben Hofstufe mit Ziel, die Rohstoffe der aktuellen Stufe mit Lagergrenze und Rate pro Minute, Einwohner, Baumeister, Münzen, Überfall und Tempo. Links Leiste mit Insel, Dorf, Waren, Hafen, Wehr, Raubzug, Chronik und eine Tafel mit nächstem Ziel, Baumeistern und Engpässen. Rechts die Auswahl mit Betrieb, Ausbau und Lage.
 - **Wirtschaft:** Holz → Bretter oder Holzkohle, Weizen → Brot, Erz + Kohle → Eisen, Lehm + Kohle → Ziegel, Wolle → Stoff, Flachs → Leinen → Segel, Honig → Met, Milch → Käse, Fell → Leder, Stoff + Leder → Kleidung, Eisen → Werkzeug, Waffen, Rüstung.
-- **Ausbau:** Stufe 1 bis 8. Ab Stufe 3 braucht es Werkzeug, ab Stufe 5 Silber, ab Stufe 7 Runensteine.
-- **Dorf:** Hütten, Langhäuser und Steinhäuser geben Wohnraum. Einwohner arbeiten in den Betrieben, essen Fisch, Brot oder Käse und zahlen Steuern. Brunnen, Markt, Methalle und Stabkirche heben die Laune. Der Reiter „Dorf“ zeigt Herstellung und Verbrauch je Rohstoff.
-- **Info:** Das kleine i an jedem Gebäude, Rohstoff, Krieger und Ziel erklärt Kosten, Ketten und Werte.
-- **Oberfläche:** Am Desktop oben Reiter, Einwohner, freie Baumeister, Münzen, nächster Überfall und Tempo; links laufende Bauaufträge und das Lager nach Gruppen mit Zu- und Abfluss; rechts die Auswahl. Am Handy oben die Kennzahlen, eine Reihe Rohstoffe und die Schublade „Lager“.
-- **Tempo:** Anhalten oder 1×, 2×, 4×, 8×. Angehalten bleibt die Zeit auch bei geschlossener App stehen.
-- **Überfälle:** laufen live auf der Insel. Plünderer landen, laufen auf die nächsten Gebäude zu, Hof, Wachtürme und Bogenposten schießen in ihrer Reichweite, die mit jeder Stufe wächst. Brandpfeile verdreifachen kurz den Schaden.
-- **Menü:** Einstellungen (Tag und Nacht, Akku sparen, weniger Animationen, FPS), Spielstand als Text oder Datei sichern und wieder laden, Statistik, Anleitung und ein Entwicklermenü zum Ändern von Rohstoffen, Einwohnern, Stufen, Gebieten, Zeit und den Rohdaten.
-- **Offline:** Produktion läuft bis zu 8 Stunden weiter, Bauaufträge werden auch offline fertig. Beim Öffnen kommt ein Bericht.
-- **Wehr:** Alle 15 Minuten Plünderer. Palisaden, Wachtürme und Bogenposten halten sie auf.
-- **Raubzug:** Bis zu 3 Krieger mit Proviant, Waffen und Rüstung. Nach einigen Schritten zieht ein Sturm auf und es wird gefährlicher. Nur am Schiff oder am Signalfeuer kommst du raus. Wer fällt, verliert, was er trägt; das Runenfach kommt immer heim.
+- **Dorf:** Wohnhäuser geben Platz, Einwohner arbeiten, essen Fisch, Brot oder Käse und zahlen Steuern. Laune macht alles schneller.
+- **Überfälle:** laufen live auf der Insel. Plünderer landen an der Küste nahe am Dorf, Hof, Wachtürme und Bogenposten schießen in ihrer Reichweite.
+- **Raubzug:** Bis zu 3 Krieger mit Proviant, Waffen und Rüstung, Beute sammeln und rechtzeitig heimfahren.
+- **Offline:** Produktion und Bauaufträge laufen bis zu 8 Stunden weiter.
+
+Als Nächstes: Wege und Straßen, die die Bewohner nutzen, dann Karren und Ochsen für die Logistik, dann Gebäude, die mit den Stufen von Holz über Fachwerk zu Stein wachsen.
 
 ## Entwicklung
 
 ```
 npm install          # baut www/ und synchronisiert ios/
-npm run sync         # nach Änderungen an src/game.html
+npm run sync         # nach Änderungen in src/
 open ios/App/App.xcodeproj
 ```
 
