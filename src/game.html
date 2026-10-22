@@ -24,23 +24,50 @@ img.ico{width:20px;height:20px;display:inline-block;vertical-align:middle;flex-s
 .paneled .hud{background:linear-gradient(var(--paper) 70%,rgba(248,245,238,0))}
 .paneled .brand{color:var(--falun);text-shadow:none}
 .top{display:flex;align-items:center;gap:6px}
-.brand{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:.5px;line-height:1;color:#FFF8E6;margin-right:auto;text-shadow:0 1px 3px rgba(20,30,35,.45)}
-.pillbtn{display:flex;align-items:center;gap:5px;border:none;background:rgba(248,245,238,.88);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(20,30,35,.16);border-radius:999px;padding:4px 10px 4px 6px;font-weight:700;font-variant-numeric:tabular-nums;font-size:13px;cursor:pointer;transition:transform .12s}
-.pillbtn:active{transform:scale(.94)}
-.raid.alarm{background:var(--falun);border-color:var(--falun);color:var(--paper);animation:pulse 1.1s ease-in-out infinite}
+.brand{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:.5px;line-height:1;color:#FFF8E6;text-shadow:0 1px 3px rgba(20,30,35,.45);display:none}
+.hkpis{display:flex;gap:5px;flex:1;min-width:0}
+.kpi{display:flex;align-items:center;gap:5px;border:none;background:rgba(248,245,238,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(20,30,35,.16);border-radius:999px;padding:4px 10px 4px 5px;cursor:pointer;color:var(--fjord);transition:transform .12s;min-width:0}
+.kpi:active{transform:scale(.95)}
+.kpi .kv{display:flex;flex-direction:column;align-items:flex-start;line-height:1.05}
+.kpi b{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpi small{display:none;font-size:10px;font-weight:600;color:var(--fjord-2);white-space:nowrap}
+.kpi.raid.alarm{background:var(--falun);color:var(--paper);animation:pulse 1.1s ease-in-out infinite}
+.kpi.raid.alarm small{color:rgba(255,248,230,.8)}
 @keyframes pulse{50%{transform:scale(1.06)}}
-.icon-btn{border:none;background:rgba(248,245,238,.88);box-shadow:0 2px 8px rgba(20,30,35,.16);border-radius:12px;width:36px;height:32px;cursor:pointer;display:grid;place-items:center;transition:transform .12s}
+.icon-btn{border:none;background:rgba(248,245,238,.88);box-shadow:0 2px 8px rgba(20,30,35,.16);border-radius:12px;width:36px;height:32px;cursor:pointer;display:grid;place-items:center;transition:transform .12s;flex-shrink:0}
 .icon-btn:active{transform:scale(.92)}
 .burger{width:16px;height:2px;background:var(--fjord);border-radius:2px;box-shadow:0 5px 0 var(--fjord),0 -5px 0 var(--fjord)}
-
-.strip{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;pointer-events:none}
+.tseg{display:none}
+.strip{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;height:28px;overflow:hidden;pointer-events:none}
 .strip > *{pointer-events:auto}
-.strip::-webkit-scrollbar{display:none}
-.chip{display:flex;align-items:center;gap:3px;background:rgba(248,245,238,.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:none;border-radius:999px;padding:2px 8px 2px 3px;font-size:12px;box-shadow:0 1px 4px rgba(20,30,35,.12);color:var(--fjord);font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;cursor:pointer}
-.chip.more{padding:2px 10px;font-weight:800}
+.chip{display:flex;align-items:center;gap:3px;background:rgba(248,245,238,.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:none;border-radius:999px;padding:2px 8px 2px 3px;font-size:12px;box-shadow:0 1px 4px rgba(20,30,35,.12);color:var(--fjord);height:28px;box-sizing:border-box;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;cursor:pointer}
+.chip.more{padding:2px 10px 2px 5px;font-weight:800;background:var(--fjord);color:var(--paper)}
 .chip[hidden]{display:none}
 .chip.full{color:var(--falun);box-shadow:inset 0 0 0 1.5px var(--falun)}
 .chip.bump{animation:bump .4s ease-out}
+/* Seitenleiste: Baumeister und Lager */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:min(330px, 88vw);z-index:9;background:var(--paper);box-shadow:8px 0 30px rgba(20,30,35,.25);overflow-y:auto;box-sizing:border-box;padding:calc(env(safe-area-inset-top, 0px) + 12px) 12px calc(env(safe-area-inset-bottom, 0px) + 16px) max(12px, env(safe-area-inset-left, 0px));transform:translateX(-105%);transition:transform .3s cubic-bezier(.2,.9,.25,1)}
+.sidebar.open{transform:none}
+#scrim{position:fixed;inset:0;z-index:8;background:rgba(20,30,35,.35);opacity:0;pointer-events:none;transition:opacity .3s}
+.sidebar.open ~ #scrim,#scrim.on{opacity:1;pointer-events:auto}
+.shead{display:flex;align-items:center;justify-content:space-between;font-family:var(--display);font-size:20px;margin-bottom:6px}
+.sec h4{display:flex;align-items:center;gap:6px;margin:12px 0 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--fjord-2)}
+.sec h4 .sp{flex:1}.sec h4 b{color:var(--fjord);letter-spacing:0;text-transform:none;font-size:12px}
+.sec h5{margin:10px 0 3px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--fjord-2);font-weight:700}
+.job{display:flex;align-items:center;gap:6px;padding:5px 0;border-top:1px solid rgba(216,209,195,.6)}
+.job:first-child{border-top:none}
+.job .jl{display:flex;align-items:center;gap:8px;flex:1;min-width:0;border:none;background:none;padding:0;text-align:left;cursor:pointer;color:inherit}
+.job .jl img{width:34px;height:34px;object-fit:contain;flex-shrink:0}
+.jn{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}.jn b{font-size:13px}.jn small{font-size:11px;color:var(--fjord-2);font-variant-numeric:tabular-nums}
+.jn .bar{width:100%}
+.rbtn{border:none;background:var(--gold, #E7B54C);color:var(--fjord);border-radius:999px;padding:4px 8px;font-weight:800;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:3px;flex-shrink:0}
+.job.free{color:var(--fjord-2);font-size:12px;font-weight:600;padding:8px 6px;border:1.5px dashed var(--line);border-radius:10px;margin-top:5px}
+.job.free img{opacity:.5}
+.srow2{display:grid;grid-template-columns:22px 1fr auto 44px;align-items:center;gap:6px;width:100%;border:none;background:none;padding:4px 2px;border-radius:8px;cursor:pointer;color:inherit;text-align:left;font-size:13px}
+.srow2:hover{background:rgba(216,209,195,.35)}
+.srow2 .sn{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srow2 b{font-variant-numeric:tabular-nums}
+.srow2 .bar{grid-column:2 / 5;height:3px;margin-top:-2px}
 @keyframes bump{35%{transform:scale(1.13)}}
 
 #stage{position:absolute;inset:0;overflow:hidden;background:var(--sea)}
@@ -129,7 +156,7 @@ h3{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--fjor
 .tag.red{background:var(--falun);color:var(--paper)}
 .tag.green{background:var(--moss);color:var(--paper)}
 
-.tabs{position:absolute;left:0;right:0;bottom:0;z-index:7;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:6px max(10px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 6px) max(10px, env(safe-area-inset-left, 0px));background:rgba(248,245,238,.94);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 -4px 18px rgba(20,30,35,.14)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:7;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:6px max(10px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 6px) max(10px, env(safe-area-inset-left, 0px));background:rgba(248,245,238,.94);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 -4px 18px rgba(20,30,35,.14)}
 .tabs button{border:none;background:none;border-radius:14px;padding:5px 2px 6px;font-weight:700;font-size:11px;cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;gap:1px;transition:transform .12s, background .2s}
 .tabs button:active{transform:scale(.94)}
 .tabs button img{width:28px;height:28px;transition:transform .25s cubic-bezier(.2,1.6,.4,1)}
@@ -304,12 +331,36 @@ body.calm *{animation:none!important;transition:none!important}
 .ichip img{width:30px;height:28px;object-fit:contain}
 #stage::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;background:radial-gradient(120% 90% at 50% 45%,transparent 55%,rgba(20,40,50,.22))}
 /* Breite Bildschirme (PC, iPad quer): Insel füllt die volle Breite, Auswahl als schwebende Karte rechts */
+@media (min-width:600px){.brand{display:block}.kpi small{display:block}}
+/* Desktop: feste Leiste oben (Reiter, Kennzahlen, Tempo), links Baumeister und Lager, rechts die Auswahl */
 @media (min-width:900px){
-  .sheet{left:auto;right:12px;top:calc(var(--toph) + 4px);bottom:calc(var(--navh) + 12px);width:420px;max-height:none;border-radius:20px;box-shadow:0 10px 36px rgba(20,30,35,.25);transform:translateX(calc(100% + 24px))}
+  .hud{background:rgba(248,245,238,.94);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 2px 14px rgba(20,30,35,.12);padding:8px 14px}
+  .paneled .hud{background:rgba(248,245,238,.94)}
+  .top{gap:16px}
+  .brand{color:var(--falun);text-shadow:none;font-size:26px}
+  .tabs{position:static;display:flex;gap:2px;padding:0;background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .tabs button{flex-direction:row;gap:6px;padding:6px 12px 6px 8px;font-size:13px;border-radius:12px}
+  .tabs button img{width:22px;height:22px}
+  .tabs button.on img{transform:none}
+  .tabs .dot{top:2px;right:4px}
+  .hkpis{justify-content:flex-end;gap:6px}
+  .kpi{background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;border-radius:12px;padding:4px 10px 4px 6px}
+  .kpi:hover{background:rgba(216,209,195,.4)}
+  .kpi b{font-size:15px}
+  .tseg{display:flex;background:var(--linen);border-radius:12px;padding:3px;gap:2px}
+  .tseg button{border:none;background:none;border-radius:9px;min-width:34px;height:28px;font-weight:800;font-size:12px;cursor:pointer;color:var(--fjord);display:grid;place-items:center}
+  .tseg button.on{background:var(--fjord);color:var(--paper)}
+  .icon-btn{box-shadow:none;background:var(--linen)}
+  .strip{display:none}
+  .sidebar{position:absolute;top:var(--toph);width:290px;transform:none;transition:none;z-index:6;background:rgba(248,245,238,.94);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:4px 0 18px rgba(20,30,35,.1);padding:4px 14px 20px}
+  .shead{display:none}
+  .zoom{right:auto;left:304px}
+  .zoom .tempo{display:none}
+  #paused{left:calc(50% + 145px)}
+  .sheet{left:auto;right:12px;top:calc(var(--toph) + 12px);bottom:12px;width:420px;max-height:none;border-radius:20px;box-shadow:0 10px 36px rgba(20,30,35,.25);transform:translateX(calc(100% + 24px))}
   .sheet.open{transform:none}
-  .panel{padding-inline:max(14px, calc((100% - 880px) / 2))}
-  .tabs{left:50%;right:auto;width:min(640px, 100% - 24px);transform:translateX(-50%);bottom:12px;border-radius:20px;padding:6px;box-sizing:border-box}
-  .zoom{right:auto;left:12px}
+  .panel{left:290px;padding-inline:max(18px, calc((100% - 900px) / 2))}
+  #bhud{left:calc(50% + 145px)}
 }
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
@@ -317,11 +368,29 @@ body.calm *{animation:none!important;transition:none!important}
 <div id="app">
   <div class="hud" id="hud"><header class="top">
     <div class="brand">Nordhof</div>
-    <button class="pillbtn" data-act="chip" data-k="muenzen" aria-label="Münzen"><img class="ico" data-icon="muenzen" alt=""><span data-r="muenzen">0</span></button>
-    <button id="raidChip" class="pillbtn raid" data-act="tab" data-t="wehr" aria-label="Überfall"><img class="ico" data-icon="schiff" alt=""><span id="raidT">0:00</span></button>
+    <nav class="tabs">
+      <button data-act="tab" data-t="insel" class="on"><img class="ico" data-icon="haus" alt="">Insel</button>
+      <button data-act="tab" data-t="dorf"><img class="ico" data-icon="leute" alt="">Dorf</button>
+      <button data-act="tab" data-t="handel"><img class="ico" data-icon="waage" alt="">Hafen</button>
+      <button data-act="tab" data-t="wehr"><img class="ico" data-icon="schild" alt="">Wehr</button>
+      <button data-act="tab" data-t="raub"><img class="ico" data-icon="schiff" alt="">Raubzug</button>
+    </nav>
+    <div class="hkpis">
+      <button class="kpi" data-act="tab" data-t="dorf" aria-label="Einwohner"><img class="ico i24" id="moodI" data-icon="froh" alt=""><span class="kv"><b id="popN">0</b><small>Einwohner</small></span></button>
+      <button class="kpi" data-act="side" data-s="jobs" aria-label="Baumeister"><img class="ico i24" data-icon="arbeit" alt=""><span class="kv"><b id="bldN">2/2</b><small>Baumeister frei</small></span></button>
+      <button class="kpi" data-act="chip" data-k="muenzen" aria-label="Münzen"><img class="ico i24" data-icon="muenzen" alt=""><span class="kv"><b data-r="muenzen">0</b><small>Münzen</small></span></button>
+      <button id="raidChip" class="kpi raid" data-act="tab" data-t="wehr" aria-label="Überfall"><img class="ico i24" data-icon="schiff" alt=""><span class="kv"><b id="raidT">0:00</b><small>Überfall</small></span></button>
+    </div>
+    <div class="tseg" id="tseg"><button data-act="setspeed" data-k="0" aria-label="Anhalten"><span class="pp"></span></button><button data-act="setspeed" data-k="1">1×</button><button data-act="setspeed" data-k="2">2×</button><button data-act="setspeed" data-k="4">4×</button><button data-act="setspeed" data-k="8">8×</button></div>
     <button class="icon-btn" data-act="menu" aria-label="Menü"><span class="burger"></span></button>
   </header>
   <div class="strip" id="strip"></div></div>
+  <div id="scrim" data-act="side"></div>
+  <aside id="side" class="sidebar">
+    <div class="shead"><b>Übersicht</b><button class="x" data-act="side" aria-label="Schließen"></button></div>
+    <section class="sec"><h4><img class="ico i16" data-icon="arbeit" alt="">Baumeister<span class="sp"></span><b id="bldF"></b></h4><div id="jobs"></div></section>
+    <section class="sec"><h4><img class="ico i16" data-icon="truhe" alt="">Lager<span class="sp"></span><b id="capT"></b></h4><div id="store"></div></section>
+  </aside>
   <main id="stage">
     <canvas id="cv"></canvas>
     <div class="zoom"><button data-act="zoom" data-z="1.25" aria-label="Näher">+</button><button data-act="zoom" data-z="0.8" aria-label="Weiter weg">−</button><button id="pauseB" class="tempo" data-act="pause" aria-label="Anhalten"><span class="pp"></span></button><button id="speedB" class="tempo" data-act="speed" aria-label="Tempo">1×</button></div>
@@ -331,13 +400,6 @@ body.calm *{animation:none!important;transition:none!important}
     <section id="sheet" class="sheet"></section>
     <section id="panel" class="panel" hidden></section>
   </main>
-  <nav class="tabs">
-    <button data-act="tab" data-t="insel" class="on"><img class="ico" data-icon="haus" alt="">Insel</button>
-    <button data-act="tab" data-t="dorf"><img class="ico" data-icon="leute" alt="">Dorf</button>
-    <button data-act="tab" data-t="handel"><img class="ico" data-icon="waage" alt="">Hafen</button>
-    <button data-act="tab" data-t="wehr"><img class="ico" data-icon="schild" alt="">Wehr</button>
-    <button data-act="tab" data-t="raub"><img class="ico" data-icon="schiff" alt="">Raubzug</button>
-  </nav>
 </div>
 <div id="modal" class="modal" hidden><div class="mcard" id="modalCard"></div></div>
 
@@ -960,7 +1022,7 @@ const cv=$('#cv');let ctx=cv.getContext('2d');
 let W=0,H=0,dpr=1,view={x:0,y:0,z:1},sel=-1,fitted=false,seaGrad=null;
 function resize(){
   fitStrip();
-  const app=$('#app'),hud=$('#hud'),nav=$('.tabs');if(hud&&nav){app.style.setProperty('--toph',Math.round(hud.getBoundingClientRect().height-10)+'px');const nr=nav.getBoundingClientRect();app.style.setProperty('--navh',Math.round(window.innerHeight-nr.top)+'px');}
+  const app=$('#app'),hud=$('#hud'),nav=$('.tabs');if(hud&&nav){app.style.setProperty('--toph',Math.round(hud.getBoundingClientRect().height-(window.innerWidth>=900?0:10))+'px');const nr=nav.getBoundingClientRect();app.style.setProperty('--navh',(nr.top>window.innerHeight/2?Math.round(window.innerHeight-nr.top):0)+'px');}
   const r=$('#stage').getBoundingClientRect();if(!r.width)return;W=r.width;H=r.height;dpr=Math.min(S&&S.opt&&S.opt.eco?2:3,window.devicePixelRatio||1);
   cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
   seaGrad=ctx.createLinearGradient(0,0,0,H);seaGrad.addColorStop(0,'#93B3B9');seaGrad.addColorStop(1,'#6A909A');
@@ -1601,7 +1663,7 @@ cv.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);drag=null;pinch
 cv.addEventListener('wheel',e=>{e.preventDefault();zoomTo(view.z*(e.deltaY<0?1.1:.9));},{passive:false});
 function zoomTo(z){const nz=Math.max(.5,Math.min(3.2,z)),f=nz/view.z;view.x*=f;view.y*=f;view.z=nz;}
 function selectTile(i){sel=(i<0||S.tiles[i].t==='water')?-1:i;demolishArm=false;renderSheet();
-  if(sel>=0){const[wx,wy]=tilePos(sel%N,(sel/N)|0),py=H/2+view.y+wy*view.z,px=W/2+view.x+wx*view.z,want=H*.24;if(W>=880){const cx=(W-440)/2;glide={x:view.x+(cx-px),y:view.y+(H/2-py)};}else glide={x:view.x+(W/2-px)*.5,y:view.y+(want-py)};}}
+  if(sel>=0){const[wx,wy]=tilePos(sel%N,(sel/N)|0),py=H/2+view.y+wy*view.z,px=W/2+view.x+wx*view.z,want=H*.24;if(W>=880){const cx=(290+W-440)/2;glide={x:view.x+(cx-px),y:view.y+(H/2-py)};}else glide={x:view.x+(W/2-px)*.5,y:view.y+(want-py)};}}
 let glide=null;
 
 /* ---------- Oberfläche ---------- */
@@ -1612,17 +1674,29 @@ function btnCost(c){return' data-cost="'+esc(JSON.stringify(c))+'"';}
 function renderStrip(){
   const keys=Object.keys(RES).filter(k=>k!=='muenzen'&&(S.res[k]>=1||['holz','stein','weizen'].includes(k)));
   const sig=keys.join(',');const el=$('#strip');
-  if(el.dataset.sig!==sig){el.dataset.sig=sig;el.innerHTML='<button class="chip pop" data-act="tab" data-t="dorf" aria-label="Einwohner"><img class="ico i20" id="moodI" src="'+iconURL('froh')+'" alt=""><span id="popN">0</span></button><button class="chip" data-act="builders" aria-label="Baumeister">'+IC('arbeit','i20')+'<span id="bldN">2/2</span></button>'+keys.map(k=>'<button class="chip" data-act="chip" data-k="'+k+'" data-chip="'+k+'" aria-label="'+RES[k].n+'">'+IC(k,'i20')+'<span data-r="'+k+'">0</span></button>').join('')+'<button class="chip more" data-act="tab" data-t="dorf" aria-label="Alle Rohstoffe"></button>';fitStrip();}
+  if(el.dataset.sig!==sig){el.dataset.sig=sig;el.innerHTML=keys.map(k=>'<button class="chip" data-act="chip" data-k="'+k+'" data-chip="'+k+'" aria-label="'+RES[k].n+'">'+IC(k,'i20')+'<span data-r="'+k+'">'+fmt(S.res[k]||0)+'</span></button>').join('')+'<button class="chip more" data-act="side" data-s="store" aria-label="Lager">'+IC('truhe','i20')+'<span>Lager</span></button>';fitStrip();}
+  renderSide();
+  if(window.innerWidth<900)fitStrip();
 }
-/* Leiste höchstens zwei Reihen hoch: was nicht passt, steckt hinter „+n“ (öffnet Dorf mit allen Rohstoffen) */
+/* Handy: eine Reihe, was nicht passt, steht im Lager */
 function fitStrip(){
-  const el=$('#strip');if(!el||!el.firstChild)return;const ch=[...el.querySelectorAll('[data-chip]')],more=el.querySelector('.more');
-  ch.forEach(c=>c.hidden=false);more.hidden=true;
-  const top0=el.firstChild.offsetTop,rowH=el.firstChild.offsetHeight+4,lim=top0+rowH*1.5;
-  if(!ch.length||ch[ch.length-1].offsetTop<lim)return;
-  more.hidden=false;let n=0;
-  for(let k=ch.length-1;k>=0&&more.offsetTop>=lim;k--){ch[k].hidden=true;n++;}
-  more.textContent='+'+n;
+  const el=$('#strip');if(!el||!el.firstChild||!el.offsetParent)return;const ch=[...el.querySelectorAll('[data-chip]')],more=el.querySelector('.more');
+  ch.forEach(c=>c.hidden=false);const lim=el.firstChild.offsetTop+el.firstChild.offsetHeight*.6;
+  for(let k=ch.length-1;k>=0&&more.offsetTop>=lim;k--)ch[k].hidden=true;
+}
+/* Seitenleiste: Baumeister-Aufträge und Lager, immer im Blick (Desktop) oder als Schublade (Handy) */
+function renderSide(){
+  const jobs=[];S.tiles.forEach((T,i)=>{if(busy(T.b))jobs.push(i);});
+  const free=Math.max(0,freeB()),js=jobs.join(',')+'|'+(S.explore?S.explore.r:'')+'|'+free;const je=$('#jobs');
+  if(je.dataset.sig!==js){je.dataset.sig=js;let h='';
+    for(const i of jobs){const b=S.tiles[i].b;h+='<div class="job"><button class="jl" data-act="goto" data-i="'+i+'"><img src="'+thumb(b.type,b.lvl)+'" alt=""><span class="jn"><b>'+B[b.type].n+'</b><small>'+(b.job==='up'?'Stufe '+(b.lvl+1):'Neubau')+' · <span data-jobt="'+i+'"></span></small><span class="bar thin gold"><i data-jobbar="'+i+'"></i></span></span></button><button class="rbtn" data-act="rush" data-rush="'+i+'" aria-label="Sofort fertig"><span data-rushc="'+i+'"></span></button></div>';}
+    if(S.explore){const R=REG[S.explore.r];h+='<div class="job"><span class="jl">'+IC(R.ic,'i28')+'<span class="jn"><b>'+R.n+'</b><small>Erkundung · <span data-jobt="x"></span></small><span class="bar thin gold"><i data-jobbar="x"></i></span></span></span><button class="rbtn" data-act="rush" data-rush="x" aria-label="Sofort fertig"><span data-rushc="x"></span></button></div>';}
+    for(let k=0;k<free;k++)h+='<div class="job free">'+IC('arbeit','i20')+'<span>frei, Feld antippen und bauen</span></div>';
+    je.innerHTML=h;}
+  const groups=[['Rohstoffe','roh'],['Waren','ware'],['Ausrüstung','ausr'],['Beute','beute']],ps=producibleSet();
+  const list=groups.map(([gn,gk])=>[gn,Object.keys(RES).filter(k=>RES[k].k===gk&&(S.res[k]>=1||FLOW.p[k]>0||FLOW.c[k]>0||ps.has(k)))]).filter(g=>g[1].length);
+  const ss=list.map(g=>g[1].join(',')).join('|'),se=$('#store');
+  if(se.dataset.sig!==ss){se.dataset.sig=ss;se.innerHTML=list.map(([gn,ks])=>'<h5>'+gn+'</h5>'+ks.map(k=>'<button class="srow2" data-act="info" data-info="r:'+k+'">'+IC(k,'i20')+'<span class="sn">'+RES[k].n+'</span><b data-r="'+k+'"></b><span data-net="'+k+'"></span>'+(capped(k)?'<span class="bar thin"><i data-fill="'+k+'"></i></span>':'')+'</button>').join('')).join('');}
 }
 const lastVal={};
 function refresh(){
@@ -1641,7 +1715,7 @@ function refresh(){
   document.querySelectorAll('[data-jobbar]').forEach(el=>{const w=el.dataset.jobbar;let u,tot;if(w==='x'){if(!S.explore)return;u=S.explore.until;tot=REG[S.explore.r].t;}else{const b=S.tiles[+w].b;if(!b||!b.until)return;u=b.until;tot=b.job==='up'?bTime(b.type,b.lvl):bTime(b.type,0);}el.style.width=Math.max(0,Math.min(100,(1-(u-now())/1000/tot)*100))+'%';});
   document.querySelectorAll('[data-jobt]').forEach(el=>{const w=el.dataset.jobt;const u=w==='x'?(S.explore&&S.explore.until):(S.tiles[+w].b&&S.tiles[+w].b.until);if(u)el.textContent=fmtDur((u-now())/1000);});
   document.querySelectorAll('[data-rushc]').forEach(el=>{const w=el.dataset.rushc;const u=w==='x'?(S.explore&&S.explore.until):(S.tiles[+w].b&&S.tiles[+w].b.until);if(u)el.innerHTML=IC('muenzen','i14')+rushCost(u-now());});
-  const bn=$('#bldN');if(bn){const t=Math.max(0,freeB())+'/'+builders();if(bn.textContent!==t)bn.textContent=t;}
+  const bn=$('#bldN');if(bn){const t=Math.max(0,freeB())+'/'+builders();if(bn.textContent!==t)bn.textContent=t;$('#bldF').textContent=t+' frei';$('#capT').textContent='je '+fmt(D.cap);}
   const pn=$('#popN');if(pn){const t=S.pop.n+'/'+D.house;if(pn.textContent!==t)pn.textContent=t;const mk=moodKey();const mi=$('#moodI');if(mi.dataset.k!==mk){mi.dataset.k=mk;mi.src=iconURL(mk);}}
   document.querySelectorAll('[data-rp]').forEach(el=>{const k=el.dataset.rp,v=FLOW.p[k]||0;el.textContent=v*60>=.05?'+'+fmtN(v*60):el.dataset.z?'0':'';});
   document.querySelectorAll('[data-rc]').forEach(el=>{const k=el.dataset.rc,v=FLOW.c[k]||0;el.textContent=v*60>=.05?'−'+fmtN(v*60):el.dataset.z?'0':'';});
@@ -1650,7 +1724,7 @@ function refresh(){
     if(w==='pop')t=S.pop.n;else if(w==='house')t=D.house;else if(w==='jobs')t=D.jobs;else if(w==='work')t=Math.min(S.pop.n,D.jobs);else if(w==='mood')t=Math.round(D.h)+' %';else if(w==='tax')t='+'+fmtN(S.pop.n*.025*(.5+D.h/100)*(1+D.tax)*60)+'/min';else if(w==='eff')t=Math.round(D.eff*100)+' %';else if(w==='eat')t='−'+fmtN(S.pop.n)+'/min';
     t=String(t);if(el.textContent!==t)el.textContent=t;});
   document.querySelectorAll('[data-wbar]').forEach(el=>{const w=el.dataset.wbar;el.style.width=(w==='house'?S.pop.n/Math.max(1,D.house):w==='jobs'?(D.jobs?Math.min(1,S.pop.n/D.jobs):1):D.h/100)*100+'%';});
-  $('#raidT').textContent=S.raid.pending?'Angriff!':fmtT(S.raid.next-now());$('#raidChip').classList.toggle('alarm',S.raid.pending);
+  $('#raidT').textContent=S.raid.pending?'Angriff!':fmtT(S.raid.next-now());if(Math.floor(now()/1000)%3===0||!$('#jobs').dataset.sig)renderSide();$('#raidChip').classList.toggle('alarm',S.raid.pending);
   const wb=document.querySelector('.tabs [data-t="wehr"]');let bd=wb.querySelector('.dot');
   if(S.raid.pending&&!bd){bd=document.createElement('span');bd.className='dot';wb.appendChild(bd);}else if(!S.raid.pending&&bd)bd.remove();
 }
@@ -2013,7 +2087,7 @@ function showReport(rep){
   $('#modalCard').innerHTML=h;$('#modal').hidden=false;
 }
 /* ---------- Menü ---------- */
-const VERSION='0.5';
+const VERSION='0.6';
 const MROW=(act,ic,label,extra,cls)=>'<button class="mrow'+(cls?' '+cls:'')+'" data-act="'+act+'"'+(extra||'')+'>'+IC(ic,'i24')+'<span class="ml">'+label+'</span><span class="chev"></span></button>';
 const MHEAD=(ic,title,sub,back)=>'<div class="head">'+(back?'<button class="x back" data-act="mpage" data-p="main" aria-label="Zurück"></button>':IC(ic,'i48'))+'<div class="t"><h2>'+title+'</h2>'+(sub?'<p class="sub">'+sub+'</p>':'')+'</div><button class="x" data-act="closemodal" aria-label="Schließen"></button></div>';
 const TOG=(key,label,ic)=>'<div class="switch"><span class="n">'+IC(ic,'i24')+label+'</span><button class="btn small '+(S.opt[key]?'':'alt')+'" data-act="opt" data-k="'+key+'">'+(S.opt[key]?'An':'Aus')+'</button></div>';
@@ -2065,7 +2139,7 @@ function showMenu(page){
   $('#modalCard').innerHTML=h;$('#modal').hidden=false;
   if(mPage==='dev')$('#dvJ').value=JSON.stringify(S,null,1);
 }
-function updTempo(){const k=CLK.k,pb=$('#pauseB'),sb=$('#speedB');if(!pb)return;pb.classList.toggle('paused',!k);pb.classList.toggle('on',!k);pb.setAttribute('aria-label',k?'Anhalten':'Weiter');sb.textContent=(k||S.opt.lastSpeed||1)+'×';sb.classList.toggle('on',k>1);$('#paused').hidden=!!k;}
+function updTempo(){const k=CLK.k;document.querySelectorAll('#tseg button').forEach(b=>b.classList.toggle('on',+b.dataset.k===k));const pb=$('#pauseB'),sb=$('#speedB');if(!pb)return;pb.classList.toggle('paused',!k);pb.classList.toggle('on',!k);pb.setAttribute('aria-label',k?'Anhalten':'Weiter');sb.textContent=(k||S.opt.lastSpeed||1)+'×';sb.classList.toggle('on',k>1);$('#paused').hidden=!!k;}
 function applyOpt(){updTempo();document.body.classList.toggle('calm',!!S.opt.calm);$('#fps').hidden=!S.opt.fps;updNight();}
 /* Zeit vorspulen: alle Zeitpunkte rücken näher, der nächste Takt rechnet die Zeit nach wie nach einer Pause */
 function timeWarp(ms){
@@ -2133,6 +2207,9 @@ document.addEventListener('click',e=>{
     closebattle(){closeBattle();},
     closemodal(){$('#modal').hidden=true;},
     mpage(){showMenu(el.dataset.p);},
+    side(){const sd=$('#side');if(window.innerWidth>=900)return;sd.classList.toggle('open');$('#scrim').classList.toggle('on',sd.classList.contains('open'));if(sd.classList.contains('open')){renderSide();const t=el.dataset.s&&$('#'+el.dataset.s);if(t)t.parentElement.scrollIntoView({block:'start'});}},
+    goto(){const i=+el.dataset.i;if(tab!=='insel'){tab='insel';render();}$('#side').classList.remove('open');$('#scrim').classList.remove('on');selectTile(i);},
+    setspeed(){const k=+el.dataset.k;setSpeed(k);updTempo();save();},
     pause(){setSpeed(CLK.k?0:(S.opt.lastSpeed||1));updTempo();save();},
     speed(){const k=CLK.k||S.opt.lastSpeed||1,n=SPEEDS[(SPEEDS.indexOf(k)+1)%SPEEDS.length];setSpeed(n);updTempo();save();toast(IC('uhr','i24')+'Tempo '+n+'×');},
     opt(){const k=el.dataset.k;S.opt[k]=!S.opt[k];applyOpt();if(k==='eco'){resize();}save();showMenu(mPage);},
