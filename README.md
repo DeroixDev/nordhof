@@ -27,8 +27,10 @@ Die Signatur läuft nach 7 Tagen ab. iPhone anschließen und „Nordhof aktualis
 Version 0.7 ist für den Desktop gebaut, das Handy läuft mit. Der Spielstand aus 0.6 passt nicht auf die neue Karte und bleibt unangetastet gespeichert.
 
 - **Karte:** 96 × 96 Felder statt 29 × 29. In der Mitte das Heimatland, drumherum Nordwald, Heide, Marsch, Bergland und Dünenküste mit Flüssen und Seen. Weit herausgezoomt zeigt eine Übersicht die ganze Insel, unten rechts liegt die Minikarte.
-- **Steuerung:** Linke oder rechte Maustaste ziehen verschiebt, Mausrad zoomt zum Zeiger, WASD und Pfeile schieben. B Bauleiste, H Hof, Leertaste Pause, 1 bis 4 Tempo, U Ausbau, X Abriss, Esc bricht ab.
+- **Steuerung:** Linke oder rechte Maustaste ziehen verschiebt, Mausrad zoomt zum Zeiger, WASD und Pfeile schieben. B Bauleiste, P Pfad, R Drehen, H Hof, Leertaste Pause (dann steht alles still), 1 bis 4 Tempo (auch die Leute laufen schneller), U Ausbau, X Abriss, Esc bricht ab.
 - **Bauen:** Unten ein Gebäude wählen, ein Geist zeigt, wo es passt (grün) oder warum nicht (rot). Klick baut, Shift baut mehrere. Gebäude haben Grundflächen von 1 × 1 bis 3 × 3.
+- **Wege:** Unter Bauen, Wege mit gedrückter Maustaste ziehen: Pfad (kostenlos), Schotterweg (ab Hofstufe 2), Pflasterstraße (ab Hofstufe 4), über schmales Wasser als Brücke. Jedes Gebäude braucht einen Weg zum Hof, sonst halbe Leistung (Wohnhäuser halber Platz, Dorfleben ohne Wirkung) und ein rotes Zeichen darüber. Beim Bauen dreht sich die Tür von selbst zum Weg und das Gebäude rastet bündig an, R dreht von Hand. Ältere Spielstände bekommen beim Laden Trampelpfade.
+- **Logistik:** Betriebe legen ihre Ware vor die Tür, Träger bringen sie zum nächsten Lager (Hof oder Lagerhaus). Ladung je Gang: zu Fuß 5, mit Handkarren 10 (Stellmacher), mit Ochsenkarren 25 (Ochsenstall, nur wenn der Weg bis zum Lager Schotter oder Pflaster ist, Ochsen fressen Weizen). Ist der Vorrat voll, ruht der Betrieb. Ein Lagerhaus nah an den Betrieben und schnelle Wege machen den Unterschied.
 - **Arbeitsfläche:** Holzfäller, Steinbruch, Fischer, Jäger, Imker und Weiden brauchen passenden Boden im Umkreis. Gleiche Betriebe teilen sich überlappende Felder. Werkstätten bekommen Bonus durch Zulieferer bis 6 Felder entfernt.
 - **Hof:** Der Häuptlingshof ist das Rathaus. Jede der 8 Hofstufen schaltet Gebäude, Gebiete, Bereiche und ein Kapitel der Geschichte frei. Kein Gebäude steht höher als der Hof. Es geht los mit einem Minidorf, ohne Tutorial. Überfälle beginnen ab Hofstufe 2.
 - **Oberfläche:** Oben Hofstufe mit Ziel, die Rohstoffe der aktuellen Stufe mit Lagergrenze und Rate pro Minute, Einwohner, Baumeister, Münzen, Überfall und Tempo. Links Leiste mit Insel, Dorf, Waren, Hafen, Wehr, Raubzug, Chronik und eine Tafel mit nächstem Ziel, Baumeistern und Engpässen. Rechts die Auswahl mit Betrieb, Ausbau und Lage.
@@ -38,7 +40,7 @@ Version 0.7 ist für den Desktop gebaut, das Handy läuft mit. Der Spielstand au
 - **Raubzug:** Bis zu 3 Krieger mit Proviant, Waffen und Rüstung, Beute sammeln und rechtzeitig heimfahren.
 - **Offline:** Produktion und Bauaufträge laufen bis zu 8 Stunden weiter.
 
-Als Nächstes: Wege und Straßen, die die Bewohner nutzen, dann Karren und Ochsen für die Logistik, dann Gebäude, die mit den Stufen von Holz über Fachwerk zu Stein wachsen.
+Als Nächstes: Gebäude mit eigener Silhouette, die mit den Stufen von Holz über Fachwerk zu Stein wachsen, Felder, die sichtbar wachsen, und Kampf auf der großen Karte.
 
 ## Entwicklung
 
