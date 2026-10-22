@@ -40,7 +40,9 @@ Version 0.7 ist für den Desktop gebaut, das Handy läuft mit. Der Spielstand au
 - **Raubzug:** Bis zu 3 Krieger mit Proviant, Waffen und Rüstung, Beute sammeln und rechtzeitig heimfahren.
 - **Offline:** Produktion und Bauaufträge laufen bis zu 8 Stunden weiter.
 
-Als Nächstes: Gebäude mit eigener Silhouette, die mit den Stufen von Holz über Fachwerk zu Stein wachsen, Felder, die sichtbar wachsen, und Kampf auf der großen Karte.
+- **Gebäude:** Jede Art hat ihre eigene Form (Sägewerk mit Wasserrad, Schmiede mit offener Esse, Bäckerei mit Kuppelofen, Lagerhaus als Scheune und so weiter) und wächst mit den Stufen von Holz über Fachwerk und Stein zur Halle.
+
+Als Nächstes: Felder, die sichtbar wachsen, und Kampf auf der großen Karte.
 
 ## Entwicklung
 

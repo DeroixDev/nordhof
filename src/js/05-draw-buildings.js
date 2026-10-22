@@ -258,6 +258,7 @@ function trimmed(key,w,h,ax,ay,fn){
 }
 function blitB(sx,sy,key,fn,n){const[w,h,ax,ay]=SPRS(n||1),t=trimmed(key,w,h,ax,ay,fn);ctx.drawImage(t.c,sx+t.x,sy+t.y,t.w,t.h);}
 function topH(b){const st=B[b.type].st,lv=b.lvl,n=fpOf(b.type);
+  if(SHP[b.type])return shapeH(b);
   if(st.s==='house'){const o=houseOf(st,lv,n);return o.h+o.rh+(b.type==='hof'?10:0);}
   return topH0(st,lv)*usOf(st,n);}
 function topH0(st,lv){
@@ -280,6 +281,7 @@ function bodyB(sx,sy,b,lit){scaled(sx,sy,b,(x,y,n)=>bodyB0(x,y,b,lit,n));}
 function liveB(sx,sy,b){scaled(sx,sy,b,(x,y,n)=>liveB0(x,y,b,n));
   if(b.lvl>1){const n=fpOf(b.type),[bx,by]=spt(sx,sy,.5*n,.5*n,0);ctx.drawImage(badgeSprite(b.lvl),bx-10,by-12,20,12);}}
 function bodyB0(sx,sy,b,lit,n){
+  if(shapeB(sx,sy,b,lit,n))return;
   const st=B[b.type].st,lv=b.lvl,s=st.s;
   const rot=rotOf(b),odd=rot%2===1;
   if(s==='house'){
@@ -394,6 +396,7 @@ function bodyB0(sx,sy,b,lit,n){
 }
 /* Lebendige Teile: Rauch, Flaggen, Tiere, Bienen, Boot */
 function liveB0(sx,sy,b,n){
+  if(shapeL(sx,sy,b,n))return;
   const st=B[b.type].st,lv=b.lvl,s=st.s,tt=T0/1000;
   const smoke=(x,y,n,col)=>{const c=puffSprite(col?1:0);for(let k=0;k<n;k++){const p=(tt*.45+k/n)%1,r=2.2+p*4.5;ctx.globalAlpha=.55*(1-p);ctx.drawImage(c,x+p*7+Math.sin(tt+k)*1.5-r,y-p*24-r,r*2,r*2);}ctx.globalAlpha=1;};
   if(s==='house'){
