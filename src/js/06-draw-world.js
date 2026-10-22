@@ -23,7 +23,7 @@ function nextGoal(v,ws){
   const near=ws.filter(i=>{const[x,y]=bCtr(i);return i!==from&&Math.abs(x-fx)+Math.abs(y-fy)<22;}),pool=near.length?near:ws;
   const hs=hubs().filter(h=>h!==from&&connected(h)===connected(from));
   if((d.kind==='prod'||d.kind==='craft')&&hs.length&&Math.random()<.75){let best=hs[0],bd=1e9;for(const h of hs){const[x,y]=bCtr(h),dd=Math.abs(x-fx)+Math.abs(y-fy);if(dd<bd){bd=dd;best=h;}}
-    return[best,d.out||(S.tiles[from].b.recipe||d.rec[0])];}
+    v.cart=LOG[from]?LOG[from].mode:0;return[best,d.out||(S.tiles[from].b.recipe||d.rec[0])];}
   if(from===S.hof||S.tiles[from].b.type==='lager'){const cr=pool.filter(i=>B[S.tiles[i].b.type].kind==='craft');if(cr.length&&Math.random()<.6){const t=pick(cr),tb=S.tiles[t].b,r=RECIPES[tb.recipe||B[tb.type].rec[0]];return[t,pick(Object.keys(r.in))];}}
   return[pick(pool),null];
 }
@@ -40,7 +40,7 @@ function updVill(dt){
       v.wait-=dt;if(v.wait>0)continue;
       ws=ws||walkable();if(!ws.length)continue;
       if(!S.tiles[v.at]||!S.tiles[v.at].b){v.at=pick(ws);[v.x,v.y]=doorPos(v.at);}
-      const[t,carry]=nextGoal(v,ws);if(t===undefined)continue;
+      v.cart=0;const[t,carry]=nextGoal(v,ws);if(t===undefined)continue;
       v.path=routeOf(v.at,t);v.k=0;v.to=t;v.carry=carry;v.wait=rand(1.2,3.5);continue;
     }
     let left=dt*WALK*(v.road||OFFROAD)*(1+(v.lane+.1)*.6);
@@ -65,8 +65,17 @@ function drawVill(v){
   ctx.fillStyle=v.col;ctx.beginPath();ctx.roundRect(sx-3.2,sy-12,6.4,8,2);ctx.fill();
   ctx.fillStyle='#F0C9A8';ctx.beginPath();ctx.arc(sx,sy-14.5,2.8,0,TAU);ctx.fill();
   if(v.hat){ctx.fillStyle='#5A3B24';ctx.beginPath();ctx.ellipse(sx,sy-16.5,3.6,1.5,0,0,TAU);ctx.fill();}
-  if(v.carry&&moving)ctx.drawImage(iconC(v.carry),sx+1,sy-15,11,11);
+  if(v.carry&&moving&&!v.cart)ctx.drawImage(iconC(v.carry),sx+1,sy-15,11,11);
   ctx.restore();
+  if(v.cart&&v.carry&&moving)drawCart(sx0,sy0,v);
+}
+/* Handkarren vor dem Träger, beim Ochsenkarren geht der Ochse voran */
+function drawCart(x,y,v){
+  let ux=((v.dx||0)-(v.dy||0))*TW/2,uy=((v.dx||0)+(v.dy||0))*TH/2;const l=Math.hypot(ux,uy)||1;ux/=l;uy/=l;
+  const cx=x+ux*6,cy=y+uy*6;
+  if(v.cart===2){const ox=x+ux*14,oy=y+uy*14,f=ux>=0?1:-1,st=Math.sin(v.ph*.6)*.8;ell(ox,oy,5,2,'rgba(0,0,0,.16)');ctx.fillStyle='#3B3532';ctx.fillRect(ox-3,oy-3+st*.3,1,3);ctx.fillRect(ox+2,oy-3-st*.3,1,3);ell(ox,oy-4.5,4.6,2.6,'#8A5A32');ell(ox+4.2*f,oy-5.5,1.9,1.6,'#7A4E2C');ctx.fillStyle='#EDE6D6';ctx.fillRect(ox+3.6*f-.4,oy-8,.8,1.6);ctx.strokeStyle='#5A3B24';ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(ox-3*f,oy-4);ctx.lineTo(cx,cy-3);ctx.stroke();}
+  ell(cx,cy+.5,4.5,1.6,'rgba(0,0,0,.16)');ctx.fillStyle='#8A6440';ctx.fillRect(cx-4,cy-5,8,3.4);ctx.fillStyle='#A87C52';ctx.fillRect(cx-4,cy-5.6,8,1);
+  ctx.drawImage(iconC(v.carry),cx-3.5,cy-10,7,7);ell(cx-1,cy-1.2,1.8,1.8,'#4A3222');ell(cx-1,cy-1.2,.7,.7,'#C49A62');
 }
 /* Boote, Möwen */
 const gulls=[0,1,2,3].map(()=>({x:rand(0,400),y:rand(20,200),s:rand(18,30),ph:rand(0,TAU),sc:rand(.7,1.1)}));

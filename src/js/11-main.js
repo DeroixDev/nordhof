@@ -115,7 +115,7 @@ function boot(){
     const t=now(),dt=(t-S.t)/1000;
     if(dt>60){const r=catchUp(t-S.t);if(S.chapPending){const L=S.chapPending;delete S.chapPending;showChapter(L);}else if(Object.keys(r.gain).length||r.raids.length||r.done.length||r.regs.length)showReport(r);}
     else{LIVE=true;tick(dt);LIVE=false;S.t=t;}
-    for(const i in popAcc){const T=S.tiles[i];if(!T.b||!B[T.b.type].out){delete popAcc[i];continue;}if(popAcc[i]>=3){const n=Math.floor(popAcc[i]);popAt(+i,B[T.b.type].out,n);popAcc[i]-=n;}}
+    for(const i in popAcc){const T=S.tiles[i],k=T.b&&outOf(T.b);if(!k){delete popAcc[i];continue;}if(popAcc[i]>=3){const n=Math.floor(popAcc[i]);popAt(+i,k,n);popAcc[i]-=n;}}
     if(S.raid.next&&!S.raid.pending&&t>=S.raid.next&&!S.run){S.raid.pending=true;S.raid.since=t;toast(IC('schiff','i24')+'Plünderer in Sicht!');if(tab==='wehr')render();}
     if(S.raid.pending&&!battle&&t-S.raid.since>120e3){if(document.visibilityState==='visible'&&$('#modal').hidden)openBattle();else{autoBattle();if(tab==='wehr')render();}}
     if(tab==='handel'&&t>S.boat.until)render();
@@ -131,4 +131,4 @@ function boot(){
 }
 boot();
 /* Für Tests und Fehlersuche im Browser */
-window.nordhof={get S(){return S;},view,bPos,tilePos,derive,hofUp,placeErr,get W(){return W;},get H(){return H;},get place(){return place;},freeB,connected,roadF,buildRoad,roadLine,startPlace,startRoad,get vill(){return vill;},groundDirty};
+window.nordhof={get S(){return S;},view,bPos,tilePos,derive,hofUp,placeErr,get W(){return W;},get H(){return H;},get place(){return place;},freeB,connected,roadF,buildRoad,roadLine,startPlace,startRoad,get vill(){return vill;},groundDirty,ev:s=>eval(s)};

@@ -31,28 +31,28 @@ function autoRot(type,i0,cur){
 }
 
 /* Netz: was vom Hof aus erreichbar ist und wie weit es zum nächsten Lager (Hof oder Lagerhaus) ist */
-let RCH=new Uint8Array(N*N),RDIST=new Float32Array(N*N),CONN={},HUBD={},ROADV=0;
+let RCH=new Uint8Array(N*N),RDIST=new Float32Array(N*N),RLVL=new Uint8Array(N*N),CONN={},HUBD={},HUBL={},ROADV=0;
 function hubs(){return BL.filter(i=>{const b=S.tiles[i].b;return(b.type==='hof'||b.type==='lager')&&!(b.job==='build'&&busy(b));});}
 function roadNet(){
-  RCH=new Uint8Array(N*N);RDIST=new Float32Array(N*N).fill(1e9);CONN={};HUBD={};
+  RCH=new Uint8Array(N*N);RDIST=new Float32Array(N*N).fill(1e9);RLVL=new Uint8Array(N*N);CONN={};HUBD={};HUBL={};
   const hof=S.hof,st=[];
   if(hof===undefined||!S.tiles[hof].b)return;
   for(const t of ringTiles(hof,fpOf('hof')))if(S.tiles[t].rd&&!RCH[t]){RCH[t]=1;st.push(t);}
   while(st.length){const i=st.pop(),x=i%N,y=(i/N)|0;for(const[dx,dy]of N4){const xx=x+dx,yy=y+dy;if(!inb(xx,yy))continue;const j=idx(xx,yy);if(!RCH[j]&&S.tiles[j].rd){RCH[j]=1;st.push(j);}}}
   /* Entfernung in Laufzeit vom nächsten Lager, Dijkstra über die Wege */
-  const hp=[],push=(i,d)=>{if(d>=RDIST[i])return;RDIST[i]=d;hp.push([d,i]);let k=hp.length-1;while(k){const p=(k-1)>>1;if(hp[p][0]<=hp[k][0])break;[hp[p],hp[k]]=[hp[k],hp[p]];k=p;}};
+  const hp=[],push=(i,d,l)=>{if(d>=RDIST[i])return;RDIST[i]=d;RLVL[i]=l;hp.push([d,i]);let k=hp.length-1;while(k){const p=(k-1)>>1;if(hp[p][0]<=hp[k][0])break;[hp[p],hp[k]]=[hp[k],hp[p]];k=p;}};
   const pop=()=>{const top=hp[0],l=hp.pop();if(hp.length){hp[0]=l;let k=0;for(;;){const a=2*k+1,b=a+1;let m=k;if(a<hp.length&&hp[a][0]<hp[m][0])m=a;if(b<hp.length&&hp[b][0]<hp[m][0])m=b;if(m===k)break;[hp[m],hp[k]]=[hp[k],hp[m]];k=m;}}return top;};
-  for(const h of hubs())for(const t of ringTiles(h,fpOf(S.tiles[h].b.type)))if(RCH[t])push(t,1/roadSp(t));
-  while(hp.length){const[d,i]=pop();if(d>RDIST[i])continue;const x=i%N,y=(i/N)|0;for(const[dx,dy]of N4){const xx=x+dx,yy=y+dy;if(!inb(xx,yy))continue;const j=idx(xx,yy);if(RCH[j])push(j,d+1/roadSp(j));}}
-  for(const i of BL){const b=S.tiles[i].b,ring=ringTiles(i,fpOf(b.type));let c=false,d=1e9;for(const t of ring)if(RCH[t]){c=true;d=Math.min(d,RDIST[t]);}
-    CONN[i]=c||noRoad(b.type);HUBD[i]=(b.type==='hof'||b.type==='lager')&&c?0:c?d:-1;}
+  for(const h of hubs())for(const t of ringTiles(h,fpOf(S.tiles[h].b.type)))if(RCH[t])push(t,1/roadSp(t),S.tiles[t].rd);
+  while(hp.length){const[d,i]=pop();if(d>RDIST[i])continue;const x=i%N,y=(i/N)|0;for(const[dx,dy]of N4){const xx=x+dx,yy=y+dy;if(!inb(xx,yy))continue;const j=idx(xx,yy);if(RCH[j])push(j,d+1/roadSp(j),Math.min(RLVL[i],S.tiles[j].rd));}}
+  for(const i of BL){const b=S.tiles[i].b,ring=ringTiles(i,fpOf(b.type));let c=false,d=1e9,l=0;for(const t of ring)if(RCH[t]){c=true;if(RDIST[t]<d){d=RDIST[t];l=RLVL[t];}}
+    CONN[i]=c||noRoad(b.type);HUBD[i]=(b.type==='hof'||b.type==='lager')&&c?0:c&&d<1e9?d:-1;HUBL[i]=l;}
   CONN[hof]=true;HUBD[hof]=0;
 }
 const connected=i=>CONN[i]!==false;
-/* Leistung je nach Anschluss: ohne Weg die Hälfte, mit Weg je nach Laufzeit zum nächsten Lager */
+/* Leistung je nach Anschluss: ohne Weg die Hälfte. Die Entfernung zum Lager bremst über die Träger (Logistik). */
 function roadF(i){
   const b=S.tiles[i].b;if(noRoad(b.type))return 1;if(!connected(i))return .5;
-  const d=HUBD[i];if(d===undefined||d<0)return 1;return d<=12?1:Math.max(.75,1-(d-12)/100);
+  return 1;
 }
 
 /* Weg legen oder entfernen */

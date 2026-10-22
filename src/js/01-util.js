@@ -94,6 +94,9 @@ const DRAW={
   berg(g){P(g,[-38,30,-6,-34,30,30],'#8E918A');P(g,[-6,-34,30,30,8,30],'#6F716B',false);P(g,[-6,-34,4,-14,-2,-10,-10,-16,-18,-12],'#F4F4F0',false);P(g,[10,30,26,-6,40,30],'#A3A59D');},
   duene(g){g.beginPath();g.moveTo(-40,28);g.quadraticCurveTo(-14,-14,10,10);g.quadraticCurveTo(24,-6,40,28);g.closePath();fs(g,'#E6D3A0');for(const[x,h]of[[-14,22],[-6,30],[18,20]])L(g,[x,0,x+(x%2?3:-3),-h],'#9DAE6A',3);E(g,18,20,5,4,'#E9A53A',false);},
   bauhuette(g){RR(g,-6,-30,12,60,3,'#8A5A32');g.save();g.rotate(-.5);RR(g,-26,-20,52,10,3,'#C49A62');g.restore();RR(g,-30,16,60,12,4,'#C4862A');},
+  karren(g){P(g,[-34,-6,22,-6,26,14,-30,14],'#A87C52');RR(g,-34,-12,58,8,3,'#C49A62');L(g,[22,0,44,-18],'#7A4E2C',5);E(g,-8,20,13,13,'#5A3B24');E(g,-8,20,5,5,'#C49A62');P(g,[-28,-12,-20,-26,-6,-14],'#E2B94B',false);E(g,8,-16,10,7,'#D59B4B',false);},
+  ochse(g){E(g,0,6,26,22,'#8A5A32');E(g,0,20,14,10,'#C49A7A');E(g,-6,18,2.5,2,'#3B3532',false);E(g,6,18,2.5,2,'#3B3532',false);E(g,-10,0,4,4,'#1E2426',false);E(g,10,0,4,4,'#1E2426',false);
+    g.beginPath();g.moveTo(-20,-10);g.quadraticCurveTo(-40,-14,-38,-34);g.quadraticCurveTo(-30,-18,-14,-16);g.closePath();fs(g,'#EDE6D6');g.beginPath();g.moveTo(20,-10);g.quadraticCurveTo(40,-14,38,-34);g.quadraticCurveTo(30,-18,14,-16);g.closePath();fs(g,'#EDE6D6');},
   info(g){E(g,0,0,34,34,'#3F5E6B');E(g,0,-16,5,5,'#fff',false);RR(g,-5,-6,10,28,4,'#fff',false);}
 
 };

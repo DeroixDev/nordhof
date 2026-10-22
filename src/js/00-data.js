@@ -55,6 +55,8 @@ const B={
   tempel:{n:'Stabkirche',sz:3,hl:6,g:'Dorfleben',kind:'joy',joy:15,jobs:1,cost:{ziegel:40,bretter:30,bernstein:3},st:{s:'temple'}},
   bauhuette:{n:'Bauhütte',sz:2,hl:2,g:'Wehr & Lager',kind:'builder',cost:{holz:60,stein:40,muenzen:100},max:3,st:{s:'house',ex:.22,ey:.2,h:8,rh:10,ax:'x',wall:'#C49A62',roof:'#C4862A',mat:'wood',prop:'planks'}},
   lager:{n:'Lagerhaus',sz:2,hl:2,g:'Wehr & Lager',kind:'store',cost:{holz:30,stein:20},st:{s:'house',ex:.4,ey:.3,h:12,rh:10,ax:'x',wall:'#A87C52',roof:'#5A3B24',mat:'wood',prop:'crates'}},
+  stellmacher:{n:'Stellmacher',sz:2,hl:2,g:'Wehr & Lager',kind:'trans',tl:1,jobs:2,max:1,cost:{holz:40,bretter:20},st:{s:'house',ex:.32,ey:.22,h:10,rh:11,ax:'x',wall:'#B58A5A',roof:'#6E4A2E',mat:'wood',prop:'planks'}},
+  ochsenstall:{n:'Ochsenstall',sz:3,hl:3,g:'Wehr & Lager',kind:'trans',tl:2,jobs:2,max:1,uses:{weizen:.02},cost:{bretter:40,stein:30,muenzen:120},st:{s:'pasture',animal:'ochse'}},
   palisade:{n:'Palisade',sz:1,hl:1,g:'Wehr & Lager',kind:'def',hp:25,cost:{holz:40},st:{s:'wall'}},
   turm:{n:'Wachturm',sz:1,hl:3,g:'Wehr & Lager',kind:'def',dmg:4,cost:{bretter:20,stein:30},st:{s:'tower',h:40,f:.36,body:'#8B8F8A',roof:'#9A3224'}},
   bogenposten:{n:'Bogenposten',sz:1,hl:2,g:'Wehr & Lager',kind:'def',dmg:3,hp:5,cost:{bretter:20,eisen:5},st:{s:'tower',h:24,f:.42,body:'#9C7A52',roof:'#5C7246'}}
@@ -111,7 +113,9 @@ const DESC={
   markt:'Händler und Gerede. Mehr Zufriedenheit und 10 % mehr Steuern je Stufe.',
   taverne:'Hier wird gefeiert. Braucht Met, dann steigt die Zufriedenheit stark.',
   tempel:'Die Stabkirche gibt dem Dorf Halt. Großer Zufriedenheitsschub.',
-  lager:'Mehr Platz für jeden Rohstoff.',
+  lager:'Mehr Platz für jeden Rohstoff. Auch ein Ziel für die Träger: nah an den Betrieben verkürzt es ihre Wege.',
+  stellmacher:'Baut Handkarren. Alle Träger fahren dann 10 statt 5 Stück auf einmal.',
+  ochsenstall:'Ochsen ziehen Karren mit 25 Stück. Nur auf Schotter oder Pflaster bis zum Lager, und die Ochsen fressen Weizen.',
   bauhuette:'Hier wohnt ein weiterer Baumeister. Jeder Baumeister kann gleichzeitig ein Gebäude bauen oder ausbauen.',
   silbermine:'Schürft Silber aus den Gipfeln. Muss an einen Gipfel grenzen.',
   sammler:'Sammelt Bernstein, den die Brandung an den Strand spült.',
@@ -144,7 +148,7 @@ const REG=[
 ];
 const REGI=Object.fromEntries(REG.map((r,i)=>[r.id,i]));
 /* Bauzeiten in Sekunden für Stufe 1, Ausbau auf Stufe L+1 dauert bt·2,4^L */
-const BTK={home:20,prod:30,craft:60,joy:90,store:40,def:45,builder:30};
+const BTK={home:20,prod:30,craft:60,joy:90,store:40,def:45,builder:30,trans:60};
 const BT={langhaus:60,steinhaus:120,markt:120,taverne:180,tempel:300,schneiderei:120,silbermine:180,sammler:150,schmiede:120};
 const DIFF=[null,
   {n:'Fischerdorf',hp:14,atk:2.5,storm:14,loot:[['muenzen',40],['eisen',25],['bernstein',20],['silber',10],['rune',5]]},

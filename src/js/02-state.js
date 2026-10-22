@@ -130,7 +130,7 @@ function hofUp(L){
 let REPORT=null;
 function jobsOf(b){const d=B[b.type];return d.jobs?d.jobs+b.lvl-1:0;}
 function derive(){
-  reindex();roadNet();
+  reindex();roadNet();logistics();
   let lager=0,hp=0,dmg=0,house=BASEHOUSE,jobs=0,tax=0;const joy={};
   for(const i of BL){const b=S.tiles[i].b;if(b.job==='build'&&busy(b))continue;const d=B[b.type],L=b.lvl;
     if(d.kind==='store')lager+=L;if(d.kind==='def'){hp+=(d.hp||0)*L;dmg+=(d.dmg||0)*L;}

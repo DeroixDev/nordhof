@@ -5,18 +5,19 @@ const FLOW={p:{},c:{}};let ACC={p:{},c:{}};
 function gain(k,a){const b=S.res[k]||0;add(k,a);const d=Math.max(0,S.res[k]-b);ACC.p[k]=(ACC.p[k]||0)+d;return d;}
 function use(k,a){const v=Math.min(a,S.res[k]||0);S.res[k]-=v;ACC.c[k]=(ACC.c[k]||0)+v;return v;}
 function tick(dt){
-  finishJobs();mood();
+  finishJobs();mood();logistics();
   for(const i of BL){
     const b=S.tiles[i].b;if(busy(b))continue;const d=B[b.type];
-    if(d.kind==='prod'){const a=prodRate(i)*dt,got=gain(d.out,a);if(LIVE&&got>0)popAcc[i]=(popAcc[i]||Math.random()*2)+got;continue;}
-    if(d.kind==='joy'&&d.uses){for(const k in d.uses)use(k,d.uses[k]*b.lvl*dt);continue;}
+    if(d.kind==='prod'){toBuf(b,prodRate(i)*dt);const got=haul(i,d.out,dt);if(LIVE&&got>0)popAcc[i]=(popAcc[i]||Math.random()*2)+got;continue;}
+    if((d.kind==='joy'||d.kind==='trans')&&d.uses){for(const k in d.uses)use(k,d.uses[k]*b.lvl*dt);continue;}
     if(d.kind!=='craft')continue;
     const key=b.recipe||d.rec[0],r=RECIPES[key];let time=dt*craftSpeed(i),guard=0;
     while(time>0&&guard++<500){
-      if(!b.run){if(has(r.in)&&!(capped(key)&&S.res[key]>=D.cap)){for(const k in r.in)use(k,r.in[k]);b.run=1;}else break;}
+      if(!b.run){if(has(r.in)&&bufCap(b)-(b.buf||0)>=r.out){for(const k in r.in)use(k,r.in[k]);b.run=1;}else break;}
       const need=r.t-b.prog;
-      if(time>=need){time-=need;b.prog=0;b.run=0;gain(key,r.out);if(LIVE)popAt(i,key,r.out);}else{b.prog+=time;time=0;}
+      if(time>=need){time-=need;b.prog=0;b.run=0;toBuf(b,r.out);}else{b.prog+=time;time=0;}
     }
+    {const got=haul(i,key,dt);if(LIVE&&got>0)popAcc[i]=(popAcc[i]||Math.random()*2)+got;}
   }
   people(dt);
   const a=1-Math.exp(-dt/20);

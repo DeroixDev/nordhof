@@ -82,6 +82,7 @@ function warnings(){
   const nc=BL.filter(i=>!connected(i)&&!(S.tiles[i].b.job==='build'&&busy(S.tiles[i].b)));
   if(nc.length)out.push({key:'road'+nc.length,i:nc[0],img:'<img src="'+roadThumb(1)+'" alt="">',n:nc.length===1?B[S.tiles[nc[0]].b.type].n+' ohne Weg':nc.length+' Gebäude ohne Weg',why:'Halbe Leistung. Mit einem Weg zum Hof verbinden.'});
   for(const i of BL){const b=S.tiles[i].b;if(busy(b))continue;const d=B[b.type],img='<img src="'+thumb(b.type,b.lvl)+'" alt="">';
+    const ok=outOf(b);if(ok&&b.buf>=bufCap(b)*.95&&S.res[ok]<D.cap-1){out.push({key:'t'+i,i,img,n:d.n,why:'Träger kommen nicht nach. Lager näher, besserer Weg oder Karren.',mild:1});if(out.length>=7)break;continue;}
     if(d.kind==='craft'){const key=b.recipe||d.rec[0],r=RECIPES[key];if(!b.run){const miss=Object.keys(r.in).filter(k=>(S.res[k]||0)<r.in[k]);if(miss.length)out.push({key:'c'+i,i,img,n:d.n,why:'wartet auf '+miss.map(k=>RES[k].n).join(', ')});else if(capped(key)&&S.res[key]>=D.cap)out.push({key:'f'+i,i,img,n:d.n,why:RES[key].n+': Lager voll',mild:1});}}
     else if(d.kind==='prod'){const a=AREA[i];if(a&&a.f<.5)out.push({key:'a'+i,i,img,n:d.n,why:'nur '+Math.round(a.f*100)+' % Arbeitsfläche',mild:a.f>=.25});
       else if(S.res[d.out]>=D.cap)out.push({key:'f'+i,i,img,n:d.n,why:RES[d.out].n+': Lager voll',mild:1});}
@@ -172,6 +173,12 @@ function betriebHTML(i){
     const miss=Object.keys(r.in).filter(k=>(S.res[k]||0)<r.in[k]);if(!b.run&&miss.length)h+='<p class="note warn">'+IC(miss[0],'i16')+' Wartet auf '+miss.map(k=>RES[k].n).join(', ')+'.</p>';
     if(d.rec.length>1)h+='<h3>Rezept</h3><div class="seg">'+d.rec.map(k=>'<button data-act="recipe" data-k="'+k+'" class="'+(k===key?'on':'')+'">'+IC(k,'i28')+RES[k].n+'</button>').join('')+'</div>';
   }
+  if(LOG[i]){const L=LOG[i],T=TRANS[L.mode],cap=bufCap(b),bf=b.buf||0;
+    h+='<h3>'+IC('proviant','i16')+'Träger</h3><div class="flow">'+'<span class="n">'+L.n+'×</span>'+IC(L.mode===2?'ochse':L.mode?'karren':'leute','i28')+'<span class="note" style="margin:0">'+T.n+' · '+T.cap+' Stück · hin und zurück '+fmtDur(L.trip)+'</span><span style="flex:1"></span><span class="n">bis '+fmtRate(L.rate)+'</span></div>'+
+      '<div class="flow">'+IC(outOf(b),'i28')+'<span class="note" style="margin:0">Vorrat vor der Tür</span><div class="bar'+(bf>=cap*.95?' red':'')+'"><i style="width:'+Math.min(100,bf/cap*100)+'%"></i></div><span class="n">'+Math.floor(bf)+'/'+cap+'</span></div>';
+    if(bf>=cap*.95&&S.res[outOf(b)]<D.cap-1)h+='<p class="note warn">'+IC('proviant','i16')+' Die Träger kommen nicht nach, der Betrieb wartet. Ein Lagerhaus in der Nähe, ein schnellerer Weg oder Karren helfen.</p>';
+    else if(!L.mode&&hofL()>=2&&!countType('stellmacher'))h+='<p class="note">'+IC('bretter','i16')+' Ein Stellmacher baut Handkarren: 10 statt 5 Stück je Gang.</p>';
+    else if(L.mode===1&&countType('ochsenstall')&&HUBL[i]<2)h+='<p class="note">'+IC('stein','i16')+' Ochsenkarren fahren nur, wenn der Weg bis zum Lager Schotter oder Pflaster ist.</p>';}
   if(d.kind==='store')h+='<div class="flow">'+IC('lager','i36')+'<span class="n" style="font-size:18px">'+fmt(D.cap)+'</span><span class="note" style="margin:0">Platz je Rohstoff</span></div>';
   if(d.kind==='builder')h+='<div class="flow">'+IC('arbeit','i36')+'<span class="note" style="margin:0">Hier wohnt ein Baumeister. Zusammen '+builders()+' von höchstens 5.</span></div>';
   if(d.kind==='def'||RANGE[b.type])h+='<div class="flow">'+(RANGE[b.type]?'<span class="n">'+IC('ziel','i28')+rangeOf(b).toFixed(1).replace('.',',')+' Felder</span>':'')+(d.hp?'<span class="n">'+IC('herz','i28')+'+'+d.hp*b.lvl+'</span>':'')+(d.dmg?'<span class="n">'+IC('schwert','i28')+'+'+d.dmg*b.lvl+'</span>':'')+'<span style="flex:1"></span><span class="n">'+IC('schild','i28')+Math.round(D.hp)+' / '+Math.round(D.dmg)+'</span></div>';
