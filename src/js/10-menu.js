@@ -15,7 +15,7 @@ function showMenu(page){
   } else if(mPage==='set'){
     h=MHEAD('','Einstellungen','',1)+
       '<div class="switch"><span class="n">'+IC('uhr','i24')+'Tag und Nacht</span><button class="btn small '+(S.opt.dn!=='tag'?'':'alt')+'" data-act="dn" data-v="'+(S.opt.dn!=='tag'?'tag':'auto')+'">'+(S.opt.dn!=='tag'?'An':'Aus')+'</button></div>'+
-      TOG('eco','Akku sparen (weniger Auflösung)','feuer')+TOG('calm','Weniger Animationen','herz')+TOG('fps','FPS anzeigen','uhr');
+      TOG('eco','Akku sparen (weniger Auflösung)','feuer')+TOG('calm','Weniger Animationen','herz')+TOG('fps','FPS anzeigen','uhr')+TOG('wetter','Wetter: Regen, Schnee, Nebel','winter');
   } else if(mPage==='save'){
     h=MHEAD('','Spielstand','Alles bleibt auf dem Gerät. Zum Sichern als Text kopieren oder als Datei speichern.',1)+
       '<div class="btns"><button class="btn wide" data-act="exp" data-how="copy">'+IC('truhe','i16')+'Als Text kopieren</button></div>'+
@@ -38,6 +38,7 @@ function showMenu(page){
       ['Dorf','Wohnhäuser bringen Einwohner. Sie arbeiten, essen und zahlen Steuern. Gute Laune macht alles schneller.'],
       ['Wehr','Ab Hofstufe 2 kommen Plünderer. Palisaden, Türme und Bogenposten halten sie auf.'],
       ['Raubzug','Mit bis zu 3 Kriegern losziehen, Beute sammeln und rechtzeitig am Schiff oder Signalfeuer heimfahren.'],
+      ['Jahreszeiten','Oben in der Leiste, auf dem Handy rechts auf der Karte, steht die Jahreszeit. Antippen zeigt, was sie bewirkt. Felder bringen ihren Ertrag im Herbst auf einmal. Im Winter essen die Leute mehr, heizen mit Holz, und Fischer fangen weniger. Wer vorsorgt, hat ein zufriedenes Dorf.'],
       ['Offline','Bis zu 8 Stunden läuft alles weiter, auch Bauaufträge.']];
     h=MHEAD('','Steuerung und Anleitung','',1)+H.map(x=>'<h3>'+x[0]+'</h3><p class="note" style="margin:0">'+x[1]+'</p>').join('');
   } else if(mPage==='about'){
@@ -50,7 +51,7 @@ function showMenu(page){
       '<h3>Dorf</h3><div class="drow"><span class="n">Einwohner <small style="font-weight:500">bis Wohnraum '+D.house+'</small></span><input id="dvP" type="number" inputmode="numeric" value="'+Math.floor(S.pop.n)+'"><button class="btn small" data-act="dev" data-d="setpop">Setzen</button></div>'+
       '<div class="dgrid"><button class="btn small alt" data-act="dev" data-d="fed">Hunger weg</button><button class="btn small alt" data-act="dev" data-d="heal">Krieger heilen</button></div>'+
       '<h3>Bauen und Gebiete</h3><div class="dgrid"><button class="btn small alt" data-act="dev" data-d="jobs">Aufträge fertig</button><button class="btn small alt" data-act="dev" data-d="bld5">5 Baumeister</button><button class="btn small alt" data-act="dev" data-d="lvup">Alle Stufe +1</button><button class="btn small alt" data-act="dev" data-d="lvmax">Alle bis Hofstufe</button><button class="btn small alt" data-act="dev" data-d="hofup">Hofstufe +1</button><button class="btn small alt" data-act="dev" data-d="open">Alle Gebiete offen</button><button class="btn small alt" data-act="dev" data-d="close">Nur Heimat offen</button></div>'+
-      '<h3>Zeit</h3><div class="dgrid"><button class="btn small alt" data-act="dev" data-d="w10">+10 min</button><button class="btn small alt" data-act="dev" data-d="w60">+1 h</button><button class="btn small alt" data-act="dev" data-d="w480">+8 h</button><button class="btn small alt" data-act="dev" data-d="raid">Überfall jetzt</button><button class="btn small alt" data-act="dev" data-d="noraid">Überfall +1 h</button><button class="btn small alt" data-act="dev" data-d="dn">Licht: '+({auto:'Uhrzeit',tag:'Tag',nacht:'Nacht'}[S.opt.dn||'auto'])+'</button></div>'+
+      '<h3>Zeit</h3><div class="dgrid"><button class="btn small alt" data-act="dev" data-d="w10">+10 min</button><button class="btn small alt" data-act="dev" data-d="w60">+1 h</button><button class="btn small alt" data-act="dev" data-d="w480">+8 h</button><button class="btn small alt" data-act="dev" data-d="season">Nächste Jahreszeit</button><button class="btn small alt" data-act="dev" data-d="raid">Überfall jetzt</button><button class="btn small alt" data-act="dev" data-d="noraid">Überfall +1 h</button><button class="btn small alt" data-act="dev" data-d="dn">Licht: '+({auto:'Uhrzeit',tag:'Tag',nacht:'Nacht'}[S.opt.dn||'auto'])+'</button></div>'+
       '<h3>Rohdaten</h3><textarea id="dvJ" class="ta mono"></textarea><div class="btns"><button class="btn alt" style="flex:1" data-act="dev" data-d="jload">Neu laden</button><button class="btn red" style="flex:1" data-act="dev" data-d="japply">Übernehmen</button></div>';
   }
   openModal(h);
@@ -85,6 +86,7 @@ function devAct(d){
     case'open':S.open=REG.map((r,i)=>i);S.explore=null;RCENT=regionCenters();groundDirty();break;
     case'close':S.open=[0];S.explore=null;RCENT=regionCenters();groundDirty();break;
     case'w10':timeWarp(10*60e3);msg='10 Minuten vorgespult';break;case'w60':timeWarp(3600e3);msg='1 Stunde vorgespult';break;case'w480':timeWarp(8*3600e3);msg='8 Stunden vorgespult';break;
+    case'season':seasonSkip();msg='Jahreszeit gewechselt';break;
     case'raid':S.raid.next=now();break;case'noraid':S.raid.pending=false;S.raid.next=now()+3600e3;break;
     case'dn':S.opt.dn={auto:'tag',tag:'nacht',nacht:'auto'}[S.opt.dn||'auto'];applyOpt();break;
     case'jload':break;

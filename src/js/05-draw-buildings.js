@@ -146,7 +146,8 @@ function treesOf(i){
 /* Drei Grüntöne je Art, damit gleiche Bäume nicht gleich aussehen */
 const TTINT=[['#4E6F46','#56784C','#38533A','#3D5B3A'],['#4A6B4C','#527455','#344F3E','#3A5841'],['#567348','#5E7C4E','#3E5638','#45603C']];
 function treeSprite(kind,s,t){
-  t=t||0;return spr('t'+kind+Math.round(s*10)+t,30,44,15,38,()=>{
+  t=t||0;if(TSEA===2&&kind==='tanne')kind='schnee';return spr('t'+kind+Math.round(s*10)+t+(TSEA?'s'+TSEA:''),30,44,15,38,()=>{
+    if(seasonTree(kind,s,t))return;
     const C=TTINT[t];
     if(kind==='tanne'||kind==='schnee'){
       const sn=kind==='schnee';
@@ -228,7 +229,7 @@ function drawSign(i,r){
 let WTK=0,WTX=0,WTY=0;
 function drawTrees(i,sx,sy,open,far){
   const ts=treesOf(i);if(!open)ctx.globalAlpha=.75;
-  const t=trimmed('f'+S.seed+ts.key,84,76,42,56,()=>{for(const q of ts){const[x,y]=spt(0,0,q.x,q.y,0);ctx.drawImage(treeSprite(q.k,q.s,q.t),x-15,y-38,30,44);}});
+  const t=trimmed('f'+S.seed+ts.key+seasonKeyFor('f'+S.seed+ts.key,TSEA?'s'+TSEA:''),84,76,42,56,()=>{for(const q of ts){const[x,y]=spt(0,0,q.x,q.y,0);ctx.drawImage(treeSprite(q.k,q.s,q.t),x-15,y-38,30,44);}});
   if(far)ctx.drawImage(t.c,sx+t.x,sy+t.y,t.w,t.h);
   else{const sw=Math.sin(T0/900+i*1.7)*.03;
     /* Wiegen im Wind direkt als Matrix setzen statt save/restore je Feld */
@@ -287,8 +288,8 @@ function topH0(st,lv){
   if(st.s==='tower')return st.h+lv*4+20;if(st.s==='temple')return 64;if(st.s==='mine')return st.h+6;
   return {well:18,market:20,kiln:16,hives:12,pit:8,wall:20}[st.s]||8;}
 function drawB(sx,sy,b){
-  const lit=night>.3?1:0;
-  blitB(sx,sy,'b'+b.type+b.lvl+lit+'r'+rotOf(b),()=>bodyB(0,0,b,lit),fpOf(b.type));
+  const lit=night>.3?1:0,k0='b'+b.type+b.lvl+lit+'r'+rotOf(b),sk=seasonKeyFor(k0,seasonKey(b));
+  blitB(sx,sy,k0+sk,()=>seasonBody(b,lit,sk),fpOf(b.type));
   liveB(sx,sy,b);
 }
 /* Mehrfeldrige Gebäude: Häuser wachsen über ihre Maße, alles andere wird gleichmäßig um us vergrößert und in der Fläche um FK gestreckt */
@@ -324,6 +325,7 @@ function bodyB0(sx,sy,b,lit,n){
     pl(sx,sy,M(-.11,f,0),M(-.11,f,h*.66),'#7A5636',1.6);pl(sx,sy,M(.11,f,0),M(.11,f,h*.66),'#7A5636',1.6);pl(sx,sy,M(-.13,f,h*.68),M(.13,f,h*.68),'#8A5A32',1.8);
     const[cx,cy]=spt(sx,sy,...M(.32,.4,0));ctx.fillStyle='#5A3B24';ctx.beginPath();ctx.roundRect(cx-5,cy-6,10,5,1.5);ctx.fill();ell(cx-3,cy-.5,1.6,1.6,'#3B3532');ell(cx+3,cy-.5,1.6,1.6,'#3B3532');ell(cx,cy-6.5,4,1.6,b.type==='erzmine'?'#B0603A':'#A3A6A0');
   } else if(s==='field'){
+    if(SKIN&&fieldBody(sx,sy,st,lv,odd))return;
     const fl=st.crop==='flachs',rows=4+lv;
     const M=(u,v)=>odd?[v,u]:[u,v];
     for(let k=1;k<rows;k++){const t=k/rows-.5;
