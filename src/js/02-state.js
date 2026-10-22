@@ -116,7 +116,7 @@ function finishJobs(){
   for(const i of BL){const b=S.tiles[i].b;if(!b.until||b.until>t)continue;
     if(b.job==='up')b.lvl++;const j=b.job;delete b.until;delete b.job;changed=true;
     if(b.type==='hof'&&j==='up')hofUp(b.lvl);
-    if(LIVE){sparks(i);anim[i]=UT-250;toast('<img class="ico i24" src="'+thumb(b.type,b.lvl)+'" alt="">'+B[b.type].n+(j==='up'?' Stufe '+b.lvl:'')+' fertig');}
+    if(LIVE){juiceDone(i,j);toast('<img class="ico i24" src="'+thumb(b.type,b.lvl)+'" alt="">'+B[b.type].n+(j==='up'?' Stufe '+b.lvl:'')+' fertig');}
     else if(REPORT)REPORT.done.push([b.type,b.lvl]);}
   if(S.explore&&S.explore.until<=t){const r=S.explore.r;S.open.push(r);S.explore=null;changed=true;groundDirty();
     if(LIVE)toast(IC(REG[r].ic,'i24')+REG[r].n+' erkundet');else if(REPORT)REPORT.reg.push(r);}
@@ -125,7 +125,7 @@ function finishJobs(){
 /* Neue Hofstufe: Überfälle beginnen ab Stufe 2, das nächste Kapitel wird erzählt */
 function hofUp(L){
   if(L>=2&&!S.raid.next)S.raid.next=nowT()+12*60e3;
-  if(LIVE)setTimeout(()=>showChapter(L),900);else S.chapPending=L;
+  if(LIVE)hofFest(L);else S.chapPending=L;
 }
 let REPORT=null;
 function jobsOf(b){const d=B[b.type];return d.jobs?d.jobs+b.lvl-1:0;}
