@@ -224,37 +224,59 @@ function drawSign(i,r){
   ctx.drawImage(iconC(R.ic),sx-12,sy-37,13,13);ctx.drawImage(iconC(ex?'uhr':'schloss'),sx+1,sy-36,11,11);
   if(ex){drawTimer(sx,sy-40,null,S.explore.until,R.t);const f=Math.sin(T0/300);ctx.fillStyle='#3B3532';ctx.fillRect(sx+12,sy-20,1,20);ctx.fillStyle='#B03A2A';ctx.beginPath();ctx.moveTo(sx+13,sy-20);ctx.lineTo(sx+21+f,sy-17);ctx.lineTo(sx+13,sy-14);ctx.fill();}
 }
+/* Weltmatrix des laufenden Bildes (0 = unbekannt) */
+let WTK=0,WTX=0,WTY=0;
 function drawTrees(i,sx,sy,open,far){
   const ts=treesOf(i);if(!open)ctx.globalAlpha=.75;
   const t=trimmed('f'+S.seed+ts.key,84,76,42,56,()=>{for(const q of ts){const[x,y]=spt(0,0,q.x,q.y,0);ctx.drawImage(treeSprite(q.k,q.s,q.t),x-15,y-38,30,44);}});
   if(far)ctx.drawImage(t.c,sx+t.x,sy+t.y,t.w,t.h);
-  else{const sw=Math.sin(T0/900+i*1.7)*.03;ctx.save();ctx.translate(sx,sy);ctx.transform(1,0,sw,1,0,0);ctx.drawImage(t.c,t.x,t.y,t.w,t.h);ctx.restore();}
+  else{const sw=Math.sin(T0/900+i*1.7)*.03;
+    /* Wiegen im Wind direkt als Matrix setzen statt save/restore je Feld */
+    if(WTK){const k=WTK;ctx.setTransform(k,0,sw*k,k,WTX+sx*k,WTY+sy*k);ctx.drawImage(t.c,t.x,t.y,t.w,t.h);ctx.setTransform(k,0,0,k,WTX,WTY);}
+    else{ctx.save();ctx.translate(sx,sy);ctx.transform(1,0,sw,1,0,0);ctx.drawImage(t.c,t.x,t.y,t.w,t.h);ctx.restore();}}
   ctx.globalAlpha=1;
 }
-/* Sprite-Zwischenspeicher: statische Teile werden einmal pro Zoomstufe gezeichnet */
-const SPR=new Map();let sprScale=0;
+/* Sprite-Zwischenspeicher: statische Teile werden je Zoomstufe einmal gezeichnet.
+   Beim Zoomen bleibt die bisherige Stufe in Gebrauch; erst wenn der Zoom ruht, wird nachgezeichnet, und zwar nur so viel, wie in wenige Millisekunden je Bild passt. Bis dahin dient die nächstbeste vorhandene Stufe. */
+const SPRC=new Map();let SPR=new Map(),sprScale=0,sprWant=0,sprWT=0,sprT0=0,sprN=0,sprD=0;
+const SPRB=5;
+function sprFrame(){
+  const sc=Math.min(4.5,Math.pow(2,Math.ceil(Math.log2(dpr*view.z)*4-1e-6)/4));
+  if(sc!==sprWant){sprWant=sc;sprWT=UT;}
+  if(!sprScale||UT-sprWT>180)sprScale=sprWant;
+  SPR=SPRC.get(sprScale);if(!SPR){SPR=new Map();SPRC.set(sprScale,SPR);}
+  SPR.used=UT;sprT0=performance.now();sprN=0;
+  if(SPRC.size>3){let o=null;for(const[k,m]of SPRC)if(k!==sprScale&&(!o||m.used<SPRC.get(o).used))o=k;SPRC.delete(o);}
+}
+/* Liegt in der aktuellen Stufe nichts vor und ist das Bildbudget verbraucht, dann eine andere Stufe nehmen */
+function sprOther(key){let best=null,bd=1e9;for(const[k,m]of SPRC){if(m===SPR)continue;const v=m.get(key);if(!v)continue;const dd=Math.abs(Math.log2(k/sprScale))-(k>sprScale?.01:0);if(dd<bd){bd=dd;best=v;}}return best;}
+const sprBusy=()=>!sprD&&sprN>0&&performance.now()-sprT0>SPRB;
+function sprMake(w,h,ax,ay,fn){const sc=sprScale,c=document.createElement('canvas');c.width=Math.ceil(w*sc);c.height=Math.ceil(h*sc);const keep=ctx,kt=T0,kf=FK;ctx=c.getContext('2d');ctx.setTransform(sc,0,0,sc,ax*sc,ay*sc);ctx.lineJoin='round';ctx.lineCap='round';T0=0;FK=1;sprD++;try{fn();}finally{sprD--;ctx=keep;T0=kt;FK=kf;}sprN++;return c;}
 function spr(key,w,h,ax,ay,fn){
-  const sc=Math.min(4.5,Math.pow(2,Math.ceil(Math.log2(dpr*view.z)*6-1e-6)/6));
-  if(sc!==sprScale){SPR.clear();sprScale=sc;}
-  let c=SPR.get(key);
-  if(!c){c=document.createElement('canvas');c.width=Math.ceil(w*sc);c.height=Math.ceil(h*sc);const keep=ctx,kt=T0;ctx=c.getContext('2d');ctx.setTransform(sc,0,0,sc,ax*sc,ay*sc);ctx.lineJoin='round';ctx.lineCap='round';T0=0;fn();ctx=keep;T0=kt;SPR.set(key,c);}
-  return c;
+  if(!SPR.size&&!sprScale)sprFrame();
+  let c=SPR.get(key);if(c)return c;
+  if(sprBusy()){const o=sprOther(key);if(o)return o;}
+  c=sprMake(w,h,ax,ay,fn);SPR.set(key,c);return c;
 }
 const SW=120,SH=150,SAX=60,SAY=118;
 /* Bildgröße je Grundfläche: n Felder breit */
 const SPRS=n=>{const w=SW+(n-1)*72,h=SH+(n-1)*70;return[w,h,w/2,h-32-(n-1)*16];};
-/* Gebäudebilder auf ihren sichtbaren Inhalt zuschneiden: weniger Pixel pro Bild und Frame */
-const TRIM=new Map();let trimScale=0;
+/* Gebäudebilder auf ihren sichtbaren Inhalt zuschneiden: weniger Pixel pro Bild und Frame. Der Zuschnitt liegt unter 'T'+key in derselben Stufe.
+   Die Ränder werden nur beim ersten Mal aus den Pixeln gelesen (das bremst die Grafikkarte) und danach in Weltmaß für jede Zoomstufe wiederverwendet. */
+const TB=new Map();
 function trimmed(key,w,h,ax,ay,fn){
-  const c=spr(key,w,h,ax,ay,fn);
-  if(trimScale!==sprScale){TRIM.clear();trimScale=sprScale;}
-  let t=TRIM.get(key);
-  if(!t){const k=w/c.width;t={c,x:-ax,y:-ay,w,h};try{const W2=c.width,H2=c.height,d=c.getContext('2d').getImageData(0,0,W2,H2).data;let x0=W2,y0=H2,x1=-1,y1=-1;
-      for(let y=0;y<H2;y++)for(let x=0;x<W2;x++)if(d[(y*W2+x)*4+3]){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}
-      if(x1>=0){x0=Math.max(0,x0-1);y0=Math.max(0,y0-1);x1=Math.min(W2-1,x1+1);y1=Math.min(H2-1,y1+1);const cw=x1-x0+1,ch=y1-y0+1,n=document.createElement('canvas');n.width=cw;n.height=ch;n.getContext('2d').drawImage(c,x0,y0,cw,ch,0,0,cw,ch);
-        t={c:n,x:x0*k-ax,y:y0*k-ay,w:cw*k,h:ch*k};SPR.set(key,n);}}catch(e){}
-    TRIM.set(key,t);}
-  return t;
+  if(!SPR.size&&!sprScale)sprFrame();
+  const tk='T'+key;let t=SPR.get(tk);if(t)return t;
+  if(sprBusy()){const o=sprOther(tk);if(o)return o;}
+  const sc=sprScale,bb=TB.get(key);
+  if(bb){const c=sprMake(bb.w,bb.h,-bb.x,-bb.y,fn);t={c,x:bb.x,y:bb.y,w:c.width/sc,h:c.height/sc};SPR.set(tk,t);return t;}
+  const c=sprMake(w,h,ax,ay,fn),k=w/c.width;t={c,x:-ax,y:-ay,w,h};
+  try{const W2=c.width,H2=c.height,d=c.getContext('2d').getImageData(0,0,W2,H2).data;let x0=W2,y0=H2,x1=-1,y1=-1;
+    for(let y=0;y<H2;y++){const r=y*W2*4;for(let x=0;x<W2;x++)if(d[r+x*4+3]){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;y1=y;}}
+    if(x1>=0){x0=Math.max(0,x0-1);y0=Math.max(0,y0-1);x1=Math.min(W2-1,x1+1);y1=Math.min(H2-1,y1+1);const cw=x1-x0+1,ch=y1-y0+1,n=document.createElement('canvas');n.width=cw;n.height=ch;n.getContext('2d').drawImage(c,x0,y0,cw,ch,0,0,cw,ch);
+      t={c:n,x:x0*k-ax,y:y0*k-ay,w:cw*k,h:ch*k};
+      const m=1.5;TB.set(key,{x:Math.max(-ax,t.x-m),y:Math.max(-ay,t.y-m),w:Math.min(w-ax,t.x+t.w+m)-Math.max(-ax,t.x-m),h:Math.min(h-ay,t.y+t.h+m)-Math.max(-ay,t.y-m)});}}catch(e){}
+  SPR.set(tk,t);return t;
 }
 function blitB(sx,sy,key,fn,n){const[w,h,ax,ay]=SPRS(n||1),t=trimmed(key,w,h,ax,ay,fn);ctx.drawImage(t.c,sx+t.x,sy+t.y,t.w,t.h);}
 function topH(b){const st=B[b.type].st,lv=b.lvl,n=fpOf(b.type);

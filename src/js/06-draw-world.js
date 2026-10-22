@@ -349,13 +349,13 @@ function drawTileObj(i,far){const T=S.tiles[i],[sx,sy]=tilePos(i%N,(i/N)|0),open
 let lastFrame=0;
 function draw(ts){
   const dt=Math.min(.05,(ts-lastFrame)/1000||0),gdt=dt*CLK.k;lastFrame=ts;UT=ts;T0+=gdt*1000;
-  keyPan(dt);updVill(Math.min(.4,gdt));tradeA+=gdt*.012;
+  keyPan(dt);sprFrame();updVill(Math.min(.4,gdt));tradeA+=gdt*.012;
   if(glide){const k=1-Math.exp(-dt*9);view.x+=(glide.x-view.x)*k;view.y+=(glide.y-view.y)*k;if(Math.abs(glide.x-view.x)+Math.abs(glide.y-view.y)<.5)glide=null;}
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.fillStyle=seaGrad;ctx.fillRect(0,0,W,H);
   ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=1.2;ctx.lineCap='round';
   ctx.beginPath();for(let i=0;i<30;i++){const x=((i*137.5+T0*.006*(i%3+1))%(W+80))-40,y=(i*71.3)%H;ctx.moveTo(x,y);ctx.quadraticCurveTo(x+8,y-3,x+16,y);}ctx.stroke();
-  const z=view.z,far=dpr*z<.55;ctx.setTransform(dpr*z,0,0,dpr*z,dpr*(W/2+view.x),dpr*(H/2+view.y));
+  const z=view.z,far=dpr*z<.55;ctx.setTransform(dpr*z,0,0,dpr*z,dpr*(W/2+view.x),dpr*(H/2+view.y));WTK=dpr*z;WTX=dpr*(W/2+view.x);WTY=dpr*(H/2+view.y);
   drawGround();
   drawMarks();
   const off=(N-1)*TH/2,wx0=(-W/2-view.x)/z,wx1=(W/2-view.x)/z,wy0=(-H/2-view.y)/z,wy1=(H/2-view.y)/z;
@@ -390,7 +390,7 @@ function draw(ts){
   if(battle)drawBattleTop();
   if(sel>=0&&!place)drawMarker(sel);
   drawParts();
-  ctx.setTransform(dpr,0,0,dpr,0,0);
+  WTK=0;ctx.setTransform(dpr,0,0,dpr,0,0);
   drawGulls(gdt);
   if(night>0){ctx.fillStyle='rgba(18,28,58,'+(night*.36)+')';ctx.fillRect(0,0,W,H);}
 }
