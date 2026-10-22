@@ -56,7 +56,13 @@ function hoverAt(px,py){
 }
 /* Platzieren: Geist folgt dem Zeiger, das Feld unter dem Zeiger ist die Mitte */
 function placeAt(px,py){const n=fpOf(place.type),[fx,fy]=screenToF(px,py),x0=Math.floor(fx-(n-1)/2),y0=Math.floor(fy-(n-1)/2);
-  const i0=inb(x0,y0)?idx(x0,y0):-1;if(i0!==place.i0){place.i0=i0;if(i0>=0&&!place.manual)place.rot=autoRot(place.type,i0,place.rot);place.err=placeErr(place.type,i0);
+  let i0=inb(x0,y0)?idx(x0,y0):-1;
+  /* Einrasten: liegt ein Weg ein Feld daneben, rückt das Gebäude bündig an den Weg */
+  if(i0>=0&&!noRoad(place.type)&&!ringTiles(i0,n).some(t=>S.tiles[t].rd)){let best=-1,bd=9;
+    for(const[dx,dy]of N8){const xx=x0+dx,yy=y0+dy;if(!inb(xx,yy))continue;const j=idx(xx,yy);if(placeErr(place.type,j)||!ringTiles(j,n).some(t=>S.tiles[t].rd))continue;
+      const dd=Math.hypot(xx+(n-1)/2-fx+.5,yy+(n-1)/2-fy+.5);if(dd<bd){bd=dd;best=j;}}
+    if(best>=0)i0=best;}
+  if(i0!==place.i0){place.i0=i0;if(i0>=0&&!place.manual)place.rot=autoRot(place.type,i0,place.rot);place.err=placeErr(place.type,i0);
     place.noRoad=i0>=0&&!noRoad(place.type)&&!ringTiles(i0,n).some(t=>RCH[t]);if(!place.err&&!has(B[place.type].cost))place.err='Zu wenig Rohstoffe';if(!place.err&&freeB()<=0)place.err='Kein Baumeister frei';renderPlacebar();}}
 function startPlace(type){
   if(battle)return;selectTile(-1);place={type,i0:-1,err:'',rot:defRot(type),manual:false};$('#app').classList.add('placing');$('#stage').classList.add('placing');
