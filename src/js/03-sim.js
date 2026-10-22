@@ -5,10 +5,10 @@ const FLOW={p:{},c:{}};let ACC={p:{},c:{}};
 function gain(k,a){const b=S.res[k]||0;add(k,a);const d=Math.max(0,S.res[k]-b);ACC.p[k]=(ACC.p[k]||0)+d;return d;}
 function use(k,a){const v=Math.min(a,S.res[k]||0);S.res[k]-=v;ACC.c[k]=(ACC.c[k]||0)+v;return v;}
 function tick(dt){
-  finishJobs();mood();logistics();
+  seasonTick(dt);finishJobs();mood();logistics();
   for(const i of BL){
     const b=S.tiles[i].b;if(busy(b))continue;const d=B[b.type];
-    if(d.kind==='prod'){toBuf(b,prodRate(i)*dt);const got=haul(i,d.out,dt);if(LIVE&&got>0)popAcc[i]=(popAcc[i]||Math.random()*2)+got;continue;}
+    if(d.kind==='prod'){if(isField(b)){fieldTick(i,b,d,dt);continue;}toBuf(b,prodRate(i)*dt);const got=haul(i,d.out,dt);if(LIVE&&got>0)popAcc[i]=(popAcc[i]||Math.random()*2)+got;continue;}
     if((d.kind==='joy'||d.kind==='trans')&&d.uses){for(const k in d.uses)use(k,d.uses[k]*b.lvl*dt);continue;}
     if(d.kind!=='craft')continue;
     const key=b.recipe||d.rec[0],r=RECIPES[key];let time=dt*craftSpeed(i),guard=0;
@@ -27,7 +27,7 @@ function tick(dt){
 /* Einwohner essen, tragen Kleidung ab, zahlen Steuern und ziehen zu oder weg */
 function people(dt){
   const P=S.pop,n=P.n;
-  let need=n/60*dt;const foods=FOOD.filter(k=>S.res[k]>0);
+  let need=n/60*dt*foodMul();const foods=FOOD.filter(k=>S.res[k]>0);
   for(let q=0;q<3&&need>1e-9;q++){const fs=FOOD.filter(k=>S.res[k]>0);if(!fs.length)break;const each=need/fs.length;for(const k of fs)need-=use(k,each);}
   const fed=need<=1e-6;
   if(S.res.kleidung>0)use('kleidung',n/2400*dt);

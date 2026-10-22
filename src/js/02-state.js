@@ -179,7 +179,7 @@ function mood(){
   const jb=D.joyB||{};
   for(const k in jb){const d=B[k];let v=d.joy*jb[k];if(d.uses&&!Object.keys(d.uses).every(r=>S.res[r]>=1))v=0;parts.push([k,Math.min(30,v),d.n+(v?'':' (kein Met)')]);}
   if(S.pop.n<D.house*.5&&D.house>8)parts.push(['huette',-5,'Leere Häuser']);
-  for(const p of parts)h+=p[1];
+  seasonMood(parts);for(const p of parts)h+=p[1];
   D.h=Math.max(0,Math.min(100,h));D.parts=parts;
   D.staff=D.jobs?Math.min(1,S.pop.n/D.jobs):1;
   D.eff=D.staff*(.7+.6*D.h/100);
@@ -214,12 +214,12 @@ function placeErr(type,i0){
 }
 function canPlace(type,i0){return !placeErr(type,i0);}
 const capped=k=>RES[k].k==='roh'||RES[k].k==='ware';
-function add(k,a){S.res[k]=(S.res[k]||0)+a;if(capped(k)&&S.res[k]>D.cap)S.res[k]=D.cap;}
+function add(k,a){const o=S.res[k]||0;S.res[k]=o+a;if(capped(k)&&S.res[k]>D.cap)S.res[k]=Math.max(D.cap,Math.min(o,S.res[k]));}
 function has(c){for(const k in c)if((S.res[k]||0)<c[k]-1e-9)return false;return true;}
 function pay(c){for(const k in c)S.res[k]-=c[k];}
 function upCost(b){
   if(b.type==='hof')return Object.assign({},HOFUP[b.lvl+1]||{});
   const d=B[b.type],L=b.lvl,c={};for(const k in d.cost)c[k]=Math.ceil(d.cost[k]*Math.pow(1.7,L));if(L>=4)c.werkzeug=L-3;if(L>=6)c.silber=L-5;if(L>=7)c.rune=1;return c;
 }
-function prodRate(i){const b=S.tiles[i].b,d=B[b.type];return d.rate*b.lvl*(1+bonus(i))*areaF(i)*roadF(i)*D.eff;}
+function prodRate(i){const b=S.tiles[i].b,d=B[b.type];return d.rate*b.lvl*(1+bonus(i))*areaF(i)*roadF(i)*D.eff*seasonF(b);}
 function craftSpeed(i){const b=S.tiles[i].b;return b.lvl*(1+bonus(i))*roadF(i)*D.eff;}

@@ -122,7 +122,7 @@ function tileColors(){
     if(T.t==='grass'){const dry=Math.max(0,a-.56)*1.6;r+=(186-r)*dry;g+=(184-g)*dry;bl+=(116-bl)*dry;const lush=Math.max(0,.42-a)*1.4;r+=(128-r)*lush;g+=(168-g)*lush;bl+=(100-bl)*lush;}
     else if(T.t==='heide'){const p=Math.max(0,a-.5)*1.2;r+=(166-r)*p;g+=(132-g)*p;bl+=(150-bl)*p;}
     else if(T.t==='sand'){const p=Math.max(0,.5-a);r-=p*20;g-=p*16;bl-=p*10;}
-    const f=1+(c-.5)*.09+(a-.5)*.05;TCOL[i*3]=r*f;TCOL[i*3+1]=g*f;TCOL[i*3+2]=bl*f;}
+    [r,g,bl]=gTint(T.t,r,g,bl);const f=1+(c-.5)*.09+(a-.5)*.05;TCOL[i*3]=r*f;TCOL[i*3+1]=g*f;TCOL[i*3+2]=bl*f;}
   /* Grundbild: GTS Texel je Feld, Eckfarben bilinear plus Fleckung; beim Zeichnen geglättet gestreckt, also ohne Rautenmuster.
      Neu gemalt wird nur, wo sich Böden geändert haben (samt Nachbarn, deren Ecken mitwandern) */
   const fresh=!GTEX||GKEY!==S.seed;if(fresh){GTT=new Uint8Array(N*N);GKEY=S.seed;}
@@ -149,7 +149,7 @@ function groundTex(list){if(!GTEX)return;ctx.save();ctx.beginPath();
   ctx.clip();ctx.transform(TW/2/GTS,TH/2/GTS,-TW/2/GTS,TH/2/GTS,0,-N*TH/2);ctx.imageSmoothingEnabled=true;ctx.drawImage(GTEX,0,0);ctx.restore();}
 /* Bodenstücke von Gebäuden: Acker, Weide, Pflaster, sonst gestampfter Hof */
 function yardOf(i){const a=anc(i);if(a<0)return null;const b=S.tiles[a].b;if(!b)return null;const st=B[b.type].st;
-  if(st.s==='field')return st.crop==='flachs'?'#8FA86C':'#B79A55';if(st.s==='pasture')return '#9DB678';if(st.s==='market')return '#B8AD94';if(st.s==='dock')return null;return 'rgba(150,128,92,.28)';}
+  if(st.s==='field')return st.crop==='flachs'?'#8FA86C':'#B79A55';if(st.s==='pasture')return yardSeason('#9DB678');if(st.s==='market')return '#B8AD94';if(st.s==='dock')return null;return 'rgba(150,128,92,.28)';}
 /* Hofboden: innen bis an die Feldkante, außen eingerückt mit runden Ecken und weichem Saum. Grundflächen sind Quadrate, daher reicht ein Rechteck je Feld */
 const YRGB={};
 function yardTile(x,y,sx,sy,col){const a=anc(idx(x,y)),same=(dx,dy)=>inb(x+dx,y+dy)&&anc(idx(x+dx,y+dy))===a;
@@ -228,7 +228,7 @@ function groundTile(x,y,pass){
   else{/* welche Böden reichen mit ihren Stempeln in dieses Feld hinein */
     GHAS.length=0;GHAS.push(T.t);for(const[dx,dy]of N8){if(!inb(x+dx,y+dy))continue;const t=S.tiles[idx(x+dx,y+dy)].t;if(t!=='water'&&!GHAS.includes(t))GHAS.push(t);}
     gX=x;gY=y;gSX=sx;gSY=sy;gR=r;gRg=T.r;gMix=GHAS.length>1;
-    for(const t of GORD)if(GHAS.includes(t))GD[t](t);}}
+    for(const t of GORD)if(GHAS.includes(t))GD[t](t);gSeasonDetail(T.t);}}
   if((pass&4)&&!open){const ex=S.explore&&S.explore.r===T.r;pq(sx,sy,[[-.5,-.5,0],[.5,-.5,0],[.5,.5,0],[-.5,.5,0]],ex?'rgba(220,226,226,.22)':'rgba(40,52,58,.28)');pq(sx,sy,[[-.5,-.5,0],[.5,-.5,0],[.5,.5,0],[-.5,.5,0]],'rgba(220,226,226,.16)');}
 }
 /* Binnenseen: Wasser ohne Verbindung zum Meer. Sie liegen auf Bodenhöhe, ohne Klippenkanten */
@@ -425,6 +425,7 @@ function draw(ts){
   if(sel>=0&&!place)drawMarker(sel);
   drawParts();drawJuice();
   WTK=0;ctx.setTransform(dpr,0,0,dpr,0,0);
+  drawWeather(gdt);
   if(night>0){ctx.fillStyle='rgba(18,28,58,'+(night*.36)+')';ctx.fillRect(0,0,W,H);}
 }
 /* Zeichen über Gebäuden ohne Weganschluss */
