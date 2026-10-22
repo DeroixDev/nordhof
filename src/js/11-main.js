@@ -5,7 +5,7 @@ function tryPlace(keep){
   if(place.err){toast(IC('schloss','i24')+place.err);return;}
   const k=place.type,i0=place.i0,d=B[k];if(!has(d.cost)||freeB()<=0||placeErr(k,i0))return;
   pay(d.cost);const b={type:k,lvl:1,prog:0,run:0,until:now()+bTime(k,0)*1000,job:'build'};if(d.rec)b.recipe=d.rec[0];
-  placeB(i0,b);groundDirty(cellsOf(i0,fpOf(k)));anim[i0]=T0;derive();dust(i0);save();
+  placeB(i0,b);groundDirty(cellsOf(i0,fpOf(k)));anim[i0]=UT;derive();dust(i0);save();
   if(keep&&has(d.cost)&&freeB()>0){place.i0=-1;if(mouse.in)placeAt(mouse.x,mouse.y);renderBuild();refresh();return;}
   endPlace();selectTile(i0);refresh();
 }
@@ -92,8 +92,8 @@ function boot(){
   document.querySelectorAll('img[data-icon]').forEach(im=>{im.src=iconURL(im.dataset.icon);});
   $('#fabI').src=thumb('bauhuette');
   S=load();let rep=null;
-  if(!S)S=fresh();
-  else{restoreClock();derive();const gap=now()-S.t;if(gap>60e3)rep=catchUp(gap);}
+  if(!S){S=fresh();initRoads();}
+  else{initRoads();restoreClock();derive();const gap=now()-S.t;if(gap>60e3)rep=catchUp(gap);}
   derive();fillOrders();if(!S.boat.until)rollBoat();RCENT=regionCenters();
   if(window.innerWidth<1200)$('#app').classList.remove('lopen');
   applyOpt();

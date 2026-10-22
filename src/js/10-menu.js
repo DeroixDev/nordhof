@@ -57,7 +57,7 @@ function showMenu(page){
 }
 function updTempo(){const k=CLK.k;document.querySelectorAll('#tseg button').forEach(b=>b.classList.toggle('on',+b.dataset.k===k));const sm=$('#speedM');sm.innerHTML=k?k+'×':'<span class="pp"></span>';sm.classList.toggle('paused',!k);$('#paused').hidden=!!k;}
 /* Welt-Zwischenspeicher nach Laden oder Neubeginn leeren */
-function resetWorld(){vill.length=0;for(const k in TREES)delete TREES[k];TCOL=null;LPC=null;groundDirty();RCENT=regionCenters();derive();sel=-1;hov=-1;if(place)endPlace();centerHof();}
+function resetWorld(){initRoads();PATHC.clear();vill.length=0;for(const k in TREES)delete TREES[k];TCOL=null;LPC=null;groundDirty();RCENT=regionCenters();derive();sel=-1;hov=-1;if(place)endPlace();centerHof();}
 function applyOpt(){updTempo();document.body.classList.toggle('calm',!!S.opt.calm);$('#fps').hidden=!S.opt.fps;updNight();}
 /* Zeit vorspulen: alle Zeitpunkte rücken näher, der nächste Takt rechnet die Zeit nach wie nach einer Pause */
 function timeWarp(ms){

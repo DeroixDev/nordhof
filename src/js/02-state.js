@@ -61,21 +61,21 @@ function fresh(){
   const s={v:4,pop:{n:4,g:0,hunger:0},seed,t:now(),res,tiles:g.tiles,open:[0],explore:null,
     raid:{next:0,n:0,pending:false,since:0,log:[]},
     boat:{k:'holz',until:0},orders:[],crew:CREW.map(n=>({n,wounded:0})),
-    run:null,wins:[0,0,0,0],prep:{sel:[true,true,false],extra:0},opt:{fps:false,dn:'auto',eco:false,calm:false,speed:1,lastSpeed:2},started:now(),chap:0};
-  for(const k of['hof','huette','holzfaeller']){const[x,y]=HOME[k];placeB(idx(x,y),{type:k,lvl:1,prog:0,run:0},s.tiles);}
+    run:null,wins:[0,0,0,0],prep:{sel:[true,true,false],extra:0},opt:{fps:false,dn:'auto',eco:false,calm:false,speed:1,lastSpeed:2},started:now(),chap:0,roadsInit:false};
+  for(const k of['hof','huette','holzfaeller']){const[x,y]=HOME[k];placeB(idx(x,y),Object.assign({type:k,lvl:1,prog:0,run:0},k==='hof'?{rot:0}:{}),s.tiles);}
   return s;
 }
 /* Speichern kompakt: Boden als Buchstaben, Gebiete als Ziffern, Gebäude als Liste. Belegte Felder werden beim Laden neu gesetzt. */
 const TCH={grass:'g',forest:'f',rock:'r',sand:'s',tundra:'t',heide:'h',moor:'m',berg:'b',water:'w'},TCR=Object.fromEntries(Object.entries(TCH).map(([k,v])=>[v,k]));
 function serialize(){
   const o=Object.assign({},S);delete o.tiles;delete o._simT;let t='',r='';const bl=[];
-  S.tiles.forEach((T,i)=>{t+=TCH[T.t];r+=T.r;if(T.b)bl.push([i,T.b]);});o.map={t,r,bl};return o;
+  let rd='';S.tiles.forEach((T,i)=>{t+=TCH[T.t];r+=T.r;rd+=T.rd||0;if(T.b)bl.push([i,T.b]);});o.map={t,r,rd,bl};return o;
 }
 function deserialize(o){
   if(!o||o.v!==4||!o.map||!o.res)throw new Error('kein Spielstand 0.7');
-  const m=o.map,tiles=[];for(let i=0;i<N*N;i++)tiles.push({t:TCR[m.t[i]]||'grass',r:+m.r[i]||0});
+  const m=o.map,tiles=[];for(let i=0;i<N*N;i++){const T={t:TCR[m.t[i]]||'grass',r:+m.r[i]||0};if(m.rd&&+m.rd[i])T.rd=+m.rd[i];tiles.push(T);}
   for(const[i,b]of m.bl)if(B[b.type])placeB(i,b,tiles);
-  const s=Object.assign({},o);delete s.map;s.tiles=tiles;
+  const s=Object.assign({},o);delete s.map;s.tiles=tiles;if(!m.rd)s.roadsInit=false;
   for(const k in RES)if(typeof s.res[k]!=='number')s.res[k]=0;
   s.opt=Object.assign({fps:false,dn:'auto',eco:false,calm:false,speed:1,lastSpeed:2},s.opt);if(!s.started)s.started=s.t||now();if(s.chap===undefined)s.chap=0;
   return s;
@@ -93,6 +93,8 @@ function removeB(i0){const b=S.tiles[i0].b;for(const c of cellsOf(i0,fpOf(b.type
 function anc(i){if(i<0)return -1;const o=S.tiles[i].o;return o===undefined?-1:o;}
 function bCtr(i){const s=fpOf(S.tiles[i].b.type);return[i%N+(s-1)/2,((i/N)|0)+(s-1)/2];}
 let BL=[];
+/* Neue Welt oder Spielstand ohne Wege: Trampelpfade zwischen allen Gebäuden anlegen */
+function initRoads(){if(S.roadsInit!==false)return;reindex();autoRoads();S.roadsInit=true;}
 function reindex(){BL=[];S.tiles.forEach((T,i)=>{if(T.b){BL.push(i);if(T.b.type==='hof')S.hof=i;}});deferMap();}
 function hofL(){const T=S.tiles[S.hof];return T&&T.b?T.b.lvl:1;}
 function maxLvl(b){return b.type==='hof'?MAXLVL:hofL();}
@@ -114,7 +116,7 @@ function finishJobs(){
   for(const i of BL){const b=S.tiles[i].b;if(!b.until||b.until>t)continue;
     if(b.job==='up')b.lvl++;const j=b.job;delete b.until;delete b.job;changed=true;
     if(b.type==='hof'&&j==='up')hofUp(b.lvl);
-    if(LIVE){sparks(i);anim[i]=T0-250;toast('<img class="ico i24" src="'+thumb(b.type,b.lvl)+'" alt="">'+B[b.type].n+(j==='up'?' Stufe '+b.lvl:'')+' fertig');}
+    if(LIVE){sparks(i);anim[i]=UT-250;toast('<img class="ico i24" src="'+thumb(b.type,b.lvl)+'" alt="">'+B[b.type].n+(j==='up'?' Stufe '+b.lvl:'')+' fertig');}
     else if(REPORT)REPORT.done.push([b.type,b.lvl]);}
   if(S.explore&&S.explore.until<=t){const r=S.explore.r;S.open.push(r);S.explore=null;changed=true;groundDirty();
     if(LIVE)toast(IC(REG[r].ic,'i24')+REG[r].n+' erkundet');else if(REPORT)REPORT.reg.push(r);}
@@ -128,13 +130,14 @@ function hofUp(L){
 let REPORT=null;
 function jobsOf(b){const d=B[b.type];return d.jobs?d.jobs+b.lvl-1:0;}
 function derive(){
-  reindex();
+  reindex();roadNet();
   let lager=0,hp=0,dmg=0,house=BASEHOUSE,jobs=0,tax=0;const joy={};
   for(const i of BL){const b=S.tiles[i].b;if(b.job==='build'&&busy(b))continue;const d=B[b.type],L=b.lvl;
     if(d.kind==='store')lager+=L;if(d.kind==='def'){hp+=(d.hp||0)*L;dmg+=(d.dmg||0)*L;}
-    if(d.kind==='home')house+=d.cap*L;jobs+=jobsOf(b);
-    if(d.kind==='joy'){joy[b.type]=(joy[b.type]||0)+L;if(d.tax)tax+=d.tax*L;}}
-  D.cap=100+50*(hofL()-1)+150*lager;D.hp=40+hp;D.dmg=4+dmg;D.house=house;D.jobs=jobs;D.joyB=joy;D.tax=tax;
+    const ok=connected(i);
+    if(d.kind==='home')house+=d.cap*L*(ok?1:.5);jobs+=jobsOf(b);
+    if(d.kind==='joy'&&ok){joy[b.type]=(joy[b.type]||0)+L;if(d.tax)tax+=d.tax*L;}}
+  D.cap=100+50*(hofL()-1)+150*lager;D.hp=40+hp;D.dmg=4+dmg;D.house=Math.floor(house);D.jobs=jobs;D.joyB=joy;D.tax=tax;
   if(S.pop.n>house)S.pop.n=house;
   areas();known();mood();villagersFit();
 }
@@ -200,6 +203,7 @@ function placeErr(type,i0){
     if(T.t==='water')return 'Im Wasser';
     if(!S.open.includes(T.r))return 'Gebiet noch nicht erkundet';
     if(T.o!==undefined)return 'Hier steht schon etwas';
+    if(T.rd)return 'Hier ist ein Weg';
     if(T.t==='berg')return 'Zu steil';if(T.t==='rock')return 'Auf Fels kann man nicht bauen';
     if(!coast){const x=c%N,y=(c/N)|0;coast=N4.some(([dx,dy])=>inb(x+dx,y+dy)&&S.tiles[idx(x+dx,y+dy)].t==='water');}}
   const ctr=idx(x0+((s-1)>>1),y0+((s-1)>>1));
@@ -217,5 +221,5 @@ function upCost(b){
   if(b.type==='hof')return Object.assign({},HOFUP[b.lvl+1]||{});
   const d=B[b.type],L=b.lvl,c={};for(const k in d.cost)c[k]=Math.ceil(d.cost[k]*Math.pow(1.7,L));if(L>=4)c.werkzeug=L-3;if(L>=6)c.silber=L-5;if(L>=7)c.rune=1;return c;
 }
-function prodRate(i){const b=S.tiles[i].b,d=B[b.type];return d.rate*b.lvl*(1+bonus(i))*areaF(i)*D.eff;}
-function craftSpeed(i){const b=S.tiles[i].b;return b.lvl*(1+bonus(i))*D.eff;}
+function prodRate(i){const b=S.tiles[i].b,d=B[b.type];return d.rate*b.lvl*(1+bonus(i))*areaF(i)*roadF(i)*D.eff;}
+function craftSpeed(i){const b=S.tiles[i].b;return b.lvl*(1+bonus(i))*roadF(i)*D.eff;}
