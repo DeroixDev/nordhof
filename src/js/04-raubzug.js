@@ -1,5 +1,5 @@
 /* ---------- Raubzug ---------- */
-function warStats(w){return{max:20+(w.ruestung?15:0),atk:4+(w.waffe?6:0)};}
+function warStats(w){return{max:20+(w.ruestung?15:0),atk:4+(w.waffe?6:0)+storyAtk()};}
 function idx5(x,y){return y*5+x;}
 function makeMap(diff){
   const cells=[];

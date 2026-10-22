@@ -366,6 +366,7 @@ function panelWaren(){
 }
 function panelChronik(){
   const L=hofL();let h=PT(IC('rune','i48'),'Chronik','Die Geschichte eurer Sippe, Kapitel für Kapitel.');
+  h+=sagaHTML();
   h+='<div class="cols">';
   for(let k=L;k>=1;k--){const C=CHAPTER[k];h+='<div class="box"><span class="lbl" style="color:var(--gold)">Kapitel '+ROM[k]+'</span><h2 style="margin:4px 0 10px">'+C.n+'</h2><div style="display:flex;gap:12px;align-items:flex-start">'+POR(C.p,56)+'<p class="sub" style="margin:0;font-size:14px;color:#D8DFE0">'+C.t+'</p></div></div>';}
   h+='</div>';
@@ -462,6 +463,7 @@ function showHof(){
 }
 /* Kapitel erzählen, wenn der Hof eine Stufe erreicht */
 function showChapter(L){
+  if(storyChapter(L))return;
   const C=CHAPTER[L];if(!C)return;S.chap=Math.max(S.chap||0,L);save();
   const u=L>1?unlocksOf(L):[];
   openModal('<span class="k2">Kapitel '+ROM[L]+'</span><h1>'+C.n+'</h1><div style="display:flex;gap:16px;align-items:flex-start">'+POR(C.p,80)+'<p>'+C.t+'</p></div>'+
@@ -490,7 +492,7 @@ $('#mcv').addEventListener('pointerdown',e=>{
   go(e);c.setPointerCapture(e.pointerId);const mv=ev=>go(ev),up=()=>{c.removeEventListener('pointermove',mv);c.removeEventListener('pointerup',up);};c.addEventListener('pointermove',mv);c.addEventListener('pointerup',up);
 });
 
-function price(k){return RES[k].p*(k===S.boat.k?2:1);}
+function price(k){return storyPrice(RES[k].p*(k===S.boat.k?2:1));}
 function chanceQ(){const R=raiders(S.raid.n);return Math.ceil(D.hp/R.dmg)/Math.ceil(R.hp/D.dmg);}
 function panelWehr(){
   const R=raiders(S.raid.n),q=chanceQ(),pos=Math.max(4,Math.min(96,(q-.5)/1.2*100));
