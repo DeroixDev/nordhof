@@ -150,6 +150,22 @@ function groundTex(list){if(!GTEX)return;ctx.save();ctx.beginPath();
 /* Bodenstücke von Gebäuden: Acker, Weide, Pflaster, sonst gestampfter Hof */
 function yardOf(i){const a=anc(i);if(a<0)return null;const b=S.tiles[a].b;if(!b)return null;const st=B[b.type].st;
   if(st.s==='field')return st.crop==='flachs'?'#8FA86C':'#B79A55';if(st.s==='pasture')return '#9DB678';if(st.s==='market')return '#B8AD94';if(st.s==='dock')return null;return 'rgba(150,128,92,.28)';}
+/* Hofboden: innen bis an die Feldkante, außen eingerückt mit runden Ecken und weichem Saum. Grundflächen sind Quadrate, daher reicht ein Rechteck je Feld */
+const YRGB={};
+function yardTile(x,y,sx,sy,col){const a=anc(idx(x,y)),same=(dx,dy)=>inb(x+dx,y+dy)&&anc(idx(x+dx,y+dy))===a;
+  const L=same(-1,0),R=same(1,0),U=same(0,-1),D=same(0,1),solid=col[0]==='#';
+  let base=YRGB[col];if(!base){if(solid){const n=parseInt(col.slice(1),16);base=[n>>16,n>>8&255,n&255,1];}else{const m=col.match(/[\d.]+/g).map(Number);base=m;}YRGB[col]=base;}
+  const rg=(k)=>'rgba('+base[0]+','+base[1]+','+base[2]+','+(base[3]*k)+')';
+  for(const[e,k]of solid?[[.06,.3],[0,1]]:[[.1,.3],[.05,.4],[0,.75]]){const w=(solid?.46:.4)+e,x0=L?-.5:-w,x1=R?.5:w,y0=U?-.5:-w,y1=D?.5:w,c=w*.45,pts=[];
+    if(!L&&!U)pts.push([x0,y0+c],[x0+c,y0]);else pts.push([x0,y0]);
+    if(!R&&!U)pts.push([x1-c,y0],[x1,y0+c]);else pts.push([x1,y0]);
+    if(!R&&!D)pts.push([x1,y1-c],[x1-c,y1]);else pts.push([x1,y1]);
+    if(!L&&!D)pts.push([x0+c,y1],[x0,y1-c]);else pts.push([x0,y1]);
+    pq(sx,sy,pts.map(([u,v])=>[u,v,0]),rg(k));}
+  /* ausgefranster Rand: getretene Flecken über der Kante, damit keine Linie bleibt */
+  const r=rng(S.seed*17+idx(x,y)*389),sides=[[!L,-1,0],[!R,1,0],[!U,0,-1],[!D,0,1]];
+  for(const[out,dx,dy]of sides){if(!out)continue;for(let k=0;k<5;k++){const t=r()*1-.5,o=(solid?.44:.38)+r()*.12,u=dx?dx*o:t,v=dy?dy*o:t,[px,py]=spt(sx,sy,u,v,0);
+    ell(px,py,3+r()*5,1.5+r()*2.2,rg(solid?.35+r()*.3:.35+r()*.35));}}}
 /* Kleinteile: jeder Stempel fragt an einer verwackelten Stelle (Rauschen ±.15, Zufall ±.35 Feld), zu welchem Boden er gehört.
    So mischen sich an Grenzen Halme, Heidekraut und Schnee wie getupft, statt feldweise zu wechseln */
 let gX=0,gY=0,gSX=0,gSY=0,gR=Math.random,gMix=false,gRg=0;
@@ -203,7 +219,7 @@ function groundTile(x,y,pass){
   const wl=isSea(x,y+1),wr=isSea(x+1,y);
   if(wl){pq(sx,sy,[[-.5,.5,0],[.5,.5,0],[.5,.5,-dep],[-.5,.5,-dep]],open?'#9C8762':'#6F6450');pq(sx,sy,[[-.5,.5,-dep*.55],[.5,.5,-dep*.55],[.5,.5,-dep],[-.5,.5,-dep]],'rgba(40,30,20,.16)');pl(sx,sy,[-.5,.5,-dep*.3],[.5,.5,-dep*.3],'rgba(255,255,255,.1)',.8);}
   if(wr){pq(sx,sy,[[.5,.5,0],[.5,-.5,0],[.5,-.5,-dep],[.5,.5,-dep]],open?'#7A6A4A':'#5B523F');pq(sx,sy,[[.5,.5,-dep*.55],[.5,-.5,-dep*.55],[.5,-.5,-dep],[.5,.5,-dep]],'rgba(40,30,20,.16)');}
-  if(yd)pq(sx,sy,[[-.5,-.5,0],[.5,-.5,0],[.5,.5,0],[-.5,.5,0]],yd);}
+  if(yd)yardTile(x,y,sx,sy,yd);}
   if(pass&2){const r=rng(S.seed*31+i*977);
   if(yd){const pt=()=>spt(sx,sy,r()*.9-.45,r()*.9-.45,0),st=B[S.tiles[anc(i)].b.type].st;
     if(st.s==='market'){for(let k=-.33;k<.5;k+=.333){pl(sx,sy,[k,-.5,0],[k,.5,0],'rgba(90,80,64,.22)',.6);pl(sx,sy,[-.5,k,0],[.5,k,0],'rgba(90,80,64,.22)',.6);}}

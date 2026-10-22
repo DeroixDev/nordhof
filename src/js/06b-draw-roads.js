@@ -5,6 +5,9 @@ function roadArms(x,y){const a=[],me=idx(x,y);for(const[dx,dy]of N4){const xx=x+
 function roadShape(sx,sy,arms,w){
   /* alle Teilflächen gleich herum, damit Überlappungen nicht als Loch ausgespart werden */
   const P=L=>{let A=0;for(let k=0;k<L.length;k++){const p=L[k],q=L[(k+1)%L.length];A+=p[0]*q[1]-q[0]*p[1];}if(A<0)L=L.slice().reverse();for(let k=0;k<L.length;k++){const[u,v]=L[k],px=sx+(u-v)*TW/2,py=sy+(u+v)*TH/2;if(k)ctx.lineTo(px,py);else ctx.moveTo(px,py);}ctx.closePath();};
+  /* Sackgasse: der Weg läuft spitz und rund aus, statt abgeschnitten zu enden */
+  if(arms.length===1){const[dx,dy]=arms[0],Q=(a,b)=>[a*dx-b*dy,a*dy+b*dx];
+    P([Q(.52,-w),Q(.52,w),Q(.05,w),Q(-.16,w*.8),Q(-.3,w*.45),Q(-.36,0),Q(-.3,-w*.45),Q(-.16,-w*.8),Q(.05,-w)]);return;}
   const c=w*.42;P([[-w+c,-w],[w-c,-w],[w,-w+c],[w,w-c],[w-c,w],[-w+c,w],[-w,w-c],[-w,-w+c]]);
   for(const[dx,dy]of arms){const e=.52;if(dx)P([[0,-w],[dx*e,-w],[dx*e,w],[0,w]]);else P([[-w,0],[w,0],[w,dy*e],[-w,dy*e]]);}
 }
