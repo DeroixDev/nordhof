@@ -179,7 +179,7 @@ function mood(){
   const jb=D.joyB||{};
   for(const k in jb){const d=B[k];let v=d.joy*jb[k];if(d.uses&&!Object.keys(d.uses).every(r=>S.res[r]>=1))v=0;parts.push([k,Math.min(30,v),d.n+(v?'':' (kein Met)')]);}
   if(S.pop.n<D.house*.5&&D.house>8)parts.push(['huette',-5,'Leere Häuser']);
-  seasonMood(parts);for(const p of parts)h+=p[1];
+  seasonMood(parts);storyMood(parts);for(const p of parts)h+=p[1];
   D.h=Math.max(0,Math.min(100,h));D.parts=parts;
   D.staff=D.jobs?Math.min(1,S.pop.n/D.jobs):1;
   D.eff=D.staff*(.7+.6*D.h/100);

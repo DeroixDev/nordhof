@@ -120,10 +120,10 @@ const PCFG={
   haendler:{bg:'#D9E6E3',tun:'#5C7246',skin:'#EBC09C',cap:'#3F5E6B',beard:'#8A5A32'},
   dorf:{bg:'#EEE6D6',tun:'#B9A07A',skin:'#F0C9A8',hair:'#8A5A32'}
 };
-function portrait(kind){
-  if(PORT[kind])return PORT[kind];
+function portrait(kind,sc){
+  const key=kind+(sc>1?'@'+sc:'');if(PORT[key])return PORT[key];
   const cfg=PCFG[kind];
-  const c=mkc(120,120,g=>{
+  const c=mkc(120*(sc||1),120*(sc||1),g=>{if(sc>1)g.scale(sc,sc);
     g.save();g.beginPath();g.arc(60,60,60,0,TAU);g.clip();
     g.fillStyle=cfg.bg;g.fillRect(0,0,120,120);
     if(cfg.hood)E(g,60,58,34,38,cfg.hood,false);
@@ -146,7 +146,7 @@ function portrait(kind){
     if(cfg.helm===2){g.beginPath();g.arc(60,52,25,Math.PI,0);g.closePath();g.fillStyle='#D9A33A';g.fill();RR(g,34,48,52,7,3,'#A8761F',false);P(g,[48,30,60,12,72,30],'#E7B54C',false);}
     g.restore();
   });
-  PORT[kind]=c.toDataURL();return PORT[kind];
+  PORT[key]=c.toDataURL();return PORT[key];
 }
 const POR=(k,s)=>'<img class="por" src="'+portrait(k)+'" width="'+s+'" height="'+s+'" alt="">';
 
