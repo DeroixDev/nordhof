@@ -94,6 +94,7 @@ function bStatus(i){
   const b=S.tiles[i].b,d=B[b.type],o=[];
   if(busy(b)){o.push(['uhr',(b.job==='up'?'Ausbau auf Stufe '+(b.lvl+1):'Wird gebaut')+', noch '+fmtDur((b.until-now())/1000),'']);return o;}
   if(!connected(i))o.push(['pfad','Kein Weg zum Hof: halbe Leistung','bad']);
+  idleTip(i,o);
   if(d.kind==='prod'){const r=prodRate(i);o.push([d.out,'+'+fmtRate(r)+' '+RES[d.out].n,r>0?'good':'bad']);const a=AREA[i];if(a)o.push([ADJICON[d.adj.t]||'wiese','Arbeitsfläche '+Math.round(a.f*100)+' %',a.f<.5?'bad':'']);}
   if(d.kind==='craft'){const key=b.recipe||d.rec[0],r=RECIPES[key],miss=Object.keys(r.in).filter(k=>(S.res[k]||0)<r.in[k]);
     if(!b.run&&miss.length)o.push([miss[0],'wartet auf '+miss.map(k=>RES[k].n).join(', '),'bad']);else o.push([key,'macht '+RES[key].n,'good']);}
@@ -160,7 +161,7 @@ function inspHTML(i){
   return h;
 }
 function betriebHTML(i){
-  const b=S.tiles[i].b,d=B[b.type];let h='';
+  const b=S.tiles[i].b,d=B[b.type];let h=idleNote(i);
   if(!connected(i))h+='<p class="note warn">'+IC('pfad','i16')+' Kein Weg zum Hof. '+(d.kind==='home'?'Nur halb so viele Wohnplätze':d.kind==='joy'?'Keine Wirkung':'Halbe Leistung')+', bis ein Weg anliegt.</p><div class="btns"><button class="btn gold small" data-act="road" data-k="1">'+IC('pfad','i16')+'Pfad legen</button></div>';
   if(d.jobs){const j=jobsOf(b),f=Math.round(j*D.staff);h+='<div class="flow">'+IC('arbeit','i28')+'<div class="workers">'+Array.from({length:j},(_,k)=>'<i class="'+(k<f?'on':'')+'"></i>').join('')+'</div><span class="n">'+f+'/'+j+'</span><span style="flex:1"></span>'+IC(moodKey(),'i24')+'<span class="n">'+Math.round(D.eff*100)+' %</span></div>';}
   if(d.kind==='home')h+='<div class="flow">'+IC('leute','i36')+'<span class="n" style="font-size:18px">+'+(b.type==='hof'?BASEHOUSE+d.cap*b.lvl:d.cap*b.lvl)+'</span><span class="note" style="margin:0">Wohnplätze</span><span style="flex:1"></span><span class="n">'+IC('leute','i16')+'<span data-live="pop"></span>/<span data-live="house"></span></span></div>';

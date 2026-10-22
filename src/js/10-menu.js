@@ -15,7 +15,7 @@ function showMenu(page){
   } else if(mPage==='set'){
     h=MHEAD('','Einstellungen','',1)+
       '<div class="switch"><span class="n">'+IC('uhr','i24')+'Tag und Nacht</span><button class="btn small '+(S.opt.dn!=='tag'?'':'alt')+'" data-act="dn" data-v="'+(S.opt.dn!=='tag'?'tag':'auto')+'">'+(S.opt.dn!=='tag'?'An':'Aus')+'</button></div>'+
-      TOG('eco','Akku sparen (weniger Auflösung)','feuer')+TOG('calm','Weniger Animationen','herz')+TOG('fps','FPS anzeigen','uhr');
+      TOG('eco','Akku sparen (weniger Auflösung)','feuer')+TOG('calm','Weniger Animationen','herz')+TOG('fps','FPS anzeigen','uhr')+sndHTML();
   } else if(mPage==='save'){
     h=MHEAD('','Spielstand','Alles bleibt auf dem Gerät. Zum Sichern als Text kopieren oder als Datei speichern.',1)+
       '<div class="btns"><button class="btn wide" data-act="exp" data-how="copy">'+IC('truhe','i16')+'Als Text kopieren</button></div>'+

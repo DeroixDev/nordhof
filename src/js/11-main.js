@@ -2,22 +2,22 @@
 /* Bauen: zahlen, Fläche belegen, Baustelle starten */
 function tryPlace(keep){
   if(!place||roadMode()||place.i0<0)return;
-  if(place.err){toast(IC('schloss','i24')+place.err);return;}
+  if(place.err){toast(IC('schloss','i24')+place.err);sfx('err');return;}
   const k=place.type,i0=place.i0,d=B[k];if(!has(d.cost)||freeB()<=0||placeErr(k,i0))return;
   pay(d.cost);const b={type:k,lvl:1,prog:0,run:0,until:now()+bTime(k,0)*1000,job:'build',rot:place.rot};if(d.rec)b.recipe=d.rec[0];
-  placeB(i0,b);groundDirty([...cellsOf(i0,fpOf(k)),...ringTiles(i0,fpOf(k))]);anim[i0]=UT;derive();dust(i0);save();
+  placeB(i0,b);groundDirty([...cellsOf(i0,fpOf(k)),...ringTiles(i0,fpOf(k))]);anim[i0]=UT;derive();dust(i0);save();sfx('build');
   if(keep&&has(d.cost)&&freeB()>0){place.i0=-1;if(mouse.in)placeAt(mouse.x,mouse.y);renderBuild();refresh();return;}
   endPlace();selectTile(i0);refresh();
 }
 function doUpgrade(){
   const b=S.tiles[sel]&&S.tiles[sel].b;if(!b||b.type==='hof')return;const c=upCost(b);
-  if(busy(b)||b.lvl>=maxLvl(b)){if(b.lvl>=maxLvl(b))toast(IC('krone','i24')+'Erst den Hof ausbauen');return;}
-  if(!has(c)){toast(IC('lager','i24')+'Zu wenig Rohstoffe');return;}if(freeB()<=0){toast(IC('arbeit','i24')+'Kein Baumeister frei');return;}
-  pay(c);b.until=now()+bTime(b.type,b.lvl)*1000;b.job='up';dust(sel);derive();renderSheet();
+  if(busy(b)||b.lvl>=maxLvl(b)){if(b.lvl>=maxLvl(b)){toast(IC('krone','i24')+'Erst den Hof ausbauen');sfx('err');}return;}
+  if(!has(c)){toast(IC('lager','i24')+'Zu wenig Rohstoffe');sfx('err');return;}if(freeB()<=0){toast(IC('arbeit','i24')+'Kein Baumeister frei');sfx('err');return;}
+  pay(c);b.until=now()+bTime(b.type,b.lvl)*1000;b.job='up';dust(sel);derive();renderSheet();sfx('build');
 }
 function doHofUp(){
   const b=S.tiles[S.hof].b,g=goalState();if(!g.ready){showHof();return;}
-  pay(g.c);b.until=now()+bTime('hof',b.lvl)*1000;b.job='up';dust(S.hof);derive();closeModal();renderSheet();refresh();
+  pay(g.c);b.until=now()+bTime('hof',b.lvl)*1000;b.job='up';dust(S.hof);derive();closeModal();sfx('build');renderSheet();refresh();
   toast('<img class="ico i24" src="'+thumb('hof',b.lvl+1)+'" alt="">Hofstufe '+(b.lvl+1)+' wird gebaut');
 }
 function doDemolish(){
@@ -56,13 +56,13 @@ document.addEventListener('click',e=>{
     doplace(){tryPlace(false);},
     upgrade(){doUpgrade();},
     explore(){const r=+el.dataset.reg,R=REG[r];if(S.explore||!has(R.cost)||freeB()<=0||R.hl>hofL())return;pay(R.cost);S.explore={r,until:now()+R.t*1000};groundDirty();toast(IC('schiff','i24')+R.n+': Expedition aufgebrochen');renderSheet();},
-    rush(){const w=el.dataset.rush;const u=w==='x'?(S.explore&&S.explore.until):(S.tiles[+w].b&&S.tiles[+w].b.until);if(!u)return;const c=rushCost(u-now());if(S.res.muenzen<c){toast(IC('muenzen','i24')+'Zu wenig Münzen');return;}S.res.muenzen-=c;
+    rush(){const w=el.dataset.rush;const u=w==='x'?(S.explore&&S.explore.until):(S.tiles[+w].b&&S.tiles[+w].b.until);if(!u)return;const c=rushCost(u-now());if(S.res.muenzen<c){toast(IC('muenzen','i24')+'Zu wenig Münzen');sfx('err');return;}S.res.muenzen-=c;
       if(w==='x')S.explore.until=now();else S.tiles[+w].b.until=now();LIVE=true;finishJobs();LIVE=false;renderSheet();if(!$('#modal').hidden&&$('#modalCard').classList.contains('wide'))showHof();},
     demolish(){doDemolish();},
     recipe(){const b=S.tiles[sel].b;if(b.run){const r=RECIPES[b.recipe||B[b.type].rec[0]];for(const k in r.in)S.res[k]+=r.in[k];}b.recipe=el.dataset.k;b.run=0;b.prog=0;renderSheet();},
-    sell(){const k=el.dataset.k,n=el.dataset.n==='all'?Math.floor(S.res[k]):Math.min(10,Math.floor(S.res[k]));if(n<=0)return;S.res[k]-=n;const c=n*price(k);S.res.muenzen+=c;toast(IC(k,'i24')+'−'+n+' '+IC('muenzen','i24')+'+'+c);render();},
-    buy(){const k=el.dataset.k,c=RES[k].p*15;if(S.res.muenzen<c)return;S.res.muenzen-=c;add(k,5);toast(IC(k,'i24')+'+5');render();},
-    order(){const j=+el.dataset.j,o=S.orders[j];if(!o||S.res[o.k]<o.a)return;S.res[o.k]-=o.a;S.res.muenzen+=o.rew;S.orders.splice(j,1);fillOrders();toast(IC('truhe','i24')+'Auftrag erledigt '+IC('muenzen','i24')+'+'+o.rew);render();},
+    sell(){const k=el.dataset.k,n=el.dataset.n==='all'?Math.floor(S.res[k]):Math.min(10,Math.floor(S.res[k]));if(n<=0)return;S.res[k]-=n;const c=n*price(k);S.res.muenzen+=c;toast(IC(k,'i24')+'−'+n+' '+IC('muenzen','i24')+'+'+c);sfx('coins');render();},
+    buy(){const k=el.dataset.k,c=RES[k].p*15;if(S.res.muenzen<c)return;S.res.muenzen-=c;add(k,5);toast(IC(k,'i24')+'+5');sfx('coins');render();},
+    order(){const j=+el.dataset.j,o=S.orders[j];if(!o||S.res[o.k]<o.a)return;S.res[o.k]-=o.a;S.res.muenzen+=o.rew;S.orders.splice(j,1);fillOrders();toast(IC('truhe','i24')+'Auftrag erledigt '+IC('muenzen','i24')+'+'+o.rew);sfx('coins');render();},
     defend(){openBattle();},
     fire(){if(battle&&battle.fire&&!battle.done){battle.fire=0;battle.boost=battle.t+6;toast(IC('feuer','i24')+'Brandpfeile!');}},
     closebattle(){closeBattle();},
@@ -116,7 +116,7 @@ function boot(){
     if(dt>60){const r=catchUp(t-S.t);if(S.chapPending){const L=S.chapPending;delete S.chapPending;showChapter(L);}else if(Object.keys(r.gain).length||r.raids.length||r.done.length||r.regs.length)showReport(r);}
     else{LIVE=true;tick(dt);LIVE=false;S.t=t;}
     for(const i in popAcc){const T=S.tiles[i],k=T.b&&outOf(T.b);if(!k){delete popAcc[i];continue;}if(popAcc[i]>=3){const n=Math.floor(popAcc[i]);popAt(+i,k,n);popAcc[i]-=n;}}
-    if(S.raid.next&&!S.raid.pending&&t>=S.raid.next&&!S.run){S.raid.pending=true;S.raid.since=t;toast(IC('schiff','i24')+'Plünderer in Sicht!');if(tab==='wehr')render();}
+    if(S.raid.next&&!S.raid.pending&&t>=S.raid.next&&!S.run){S.raid.pending=true;S.raid.since=t;toast(IC('schiff','i24')+'Plünderer in Sicht!');sfx('raid');if(tab==='wehr')render();}
     if(S.raid.pending&&!battle&&t-S.raid.since>120e3){if(document.visibilityState==='visible'&&$('#modal').hidden)openBattle();else{autoBattle();if(tab==='wehr')render();}}
     if(tab==='handel'&&t>S.boat.until)render();
     document.querySelectorAll('[data-wound]').forEach(el=>{const c=S.crew[+el.dataset.wound];if(c.wounded<=t)render();else el.textContent=fmtT(c.wounded-t);});
