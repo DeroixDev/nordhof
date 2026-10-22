@@ -6,10 +6,13 @@ function roadShape(sx,sy,arms,w){
   /* alle Teilflächen gleich herum, damit Überlappungen nicht als Loch ausgespart werden */
   const P=L=>{let A=0;for(let k=0;k<L.length;k++){const p=L[k],q=L[(k+1)%L.length];A+=p[0]*q[1]-q[0]*p[1];}if(A<0)L=L.slice().reverse();for(let k=0;k<L.length;k++){const[u,v]=L[k],px=sx+(u-v)*TW/2,py=sy+(u+v)*TH/2;if(k)ctx.lineTo(px,py);else ctx.moveTo(px,py);}ctx.closePath();};
   /* Sackgasse: der Weg läuft spitz und rund aus, statt abgeschnitten zu enden */
-  if(arms.length===1){const[dx,dy]=arms[0],Q=(a,b)=>[a*dx-b*dy,a*dy+b*dx];
-    P([Q(.52,-w),Q(.52,w),Q(.05,w),Q(-.16,w*.8),Q(-.3,w*.45),Q(-.36,0),Q(-.3,-w*.45),Q(-.16,-w*.8),Q(.05,-w)]);return;}
-  const c=w*.42;P([[-w+c,-w],[w-c,-w],[w,-w+c],[w,w-c],[w-c,w],[-w+c,w],[-w,w-c],[-w,-w+c]]);
-  for(const[dx,dy]of arms){const e=.52;if(dx)P([[0,-w],[dx*e,-w],[dx*e,w],[0,w]]);else P([[-w,0],[w,0],[w,dy*e],[-w,dy*e]]);}
+  const tip=arms.length===1;if(tip){const[dx,dy]=arms[0],Q=(a,b)=>[a*dx-b*dy,a*dy+b*dx];
+    P([Q(.52,-w),Q(.52,w),Q(.05,w),Q(-.16,w*.8),Q(-.3,w*.45),Q(-.36,0),Q(-.3,-w*.45),Q(-.16,-w*.8),Q(.05,-w)]);if(!arms[0][2])return;}
+  const c=w*.42;if(!tip)P([[-w+c,-w],[w-c,-w],[w,-w+c],[w,w-c],[w-c,w],[-w+c,w],[-w,w-c],[-w,-w+c]]);
+  for(const[dx,dy,door]of arms){const e=.52;
+    /* zur Tür: der Weg wird leicht breiter und endet rund im Hofboden statt mit gerader Kante */
+    if(door){const Q=(a,b)=>[a*dx-b*dy,a*dy+b*dx],m=.6,W2=w*1.15,pts=[Q(0,-w),Q(.35,-W2)];for(let k=0;k<=6;k++){const t=-Math.PI/2+k*Math.PI/6;pts.push(Q(m+Math.cos(t)*W2*.75,Math.sin(t)*W2));}pts.push(Q(.35,W2),Q(0,w));P(pts);continue;}
+    if(dx)P([[0,-w],[dx*e,-w],[dx*e,w],[0,w]]);else P([[-w,0],[w,0],[w,dy*e],[-w,dy*e]]);}
 }
 function roadTile(x,y,ps){
   const i=idx(x,y),T=S.tiles[i];if(T.t==='water')return;
