@@ -1,8 +1,16 @@
-// Baut www/index.html aus src/game.html: ganzes HTML-Dokument drumherum, Schriften lokal statt von Google.
+// Baut das Spiel aus src/shell.html und den Skripten in src/js (in Namensreihenfolge zusammengefügt).
+// Ergebnis: dist/game.html (Fragment für die Vorschau im Browser) und www/index.html (App, Schriften lokal).
 // Aufruf: node scripts/build.mjs
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, mkdirSync } from 'node:fs';
 
-let game = readFileSync('src/game.html', 'utf8');
+const js = readdirSync('src/js').filter(f => f.endsWith('.js')).sort()
+  .map(f => `/* ---- ${f} ---- */\n` + readFileSync('src/js/' + f, 'utf8')).join('\n');
+const shell = readFileSync('src/shell.html', 'utf8');
+if (!shell.includes('/*JS*/')) throw new Error('Platzhalter /*JS*/ fehlt in src/shell.html');
+let game = shell.replace('/*JS*/', () => js);
+mkdirSync('dist', { recursive: true });
+writeFileSync('dist/game.html', game);
+
 const fonts = `<style>
 @font-face{font-family:'Grenze';font-weight:100 900;font-display:swap;src:url(fonts/grenze.woff2) format('woff2')}
 @font-face{font-family:'Work Sans';font-weight:100 900;font-display:swap;src:url(fonts/worksans.woff2) format('woff2')}
@@ -24,4 +32,4 @@ ${game}
 </html>
 `;
 writeFileSync('www/index.html', page);
-console.log('www/index.html gebaut');
+console.log('dist/game.html und www/index.html gebaut');

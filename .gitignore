@@ -3,3 +3,4 @@ build/
 .nordhof-team
 .DS_Store
 www/index.html
+dist/
