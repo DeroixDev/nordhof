@@ -1975,7 +1975,7 @@ function showMenu(page){
   } else if(mPage==='save'){
     h=MHEAD('','Spielstand','Alles bleibt auf dem Gerät. Zum Sichern als Text kopieren oder als Datei speichern.',1)+
       '<div class="btns"><button class="btn wide" data-act="exp" data-how="copy">'+IC('truhe','i16')+'Als Text kopieren</button></div>'+
-      '<div class="btns"><button class="btn alt wide" data-act="exp" data-how="file">'+IC('truhe','i16')+'Als Datei speichern</button></div>'+
+      (window.Capacitor||window.top!==window?'':'<div class="btns"><button class="btn alt wide" data-act="exp" data-how="file">'+IC('truhe','i16')+'Als Datei speichern</button></div>')+
       '<h3>Laden</h3><textarea id="impTxt" class="ta" placeholder="Gesicherten Spielstand hier einfügen"></textarea>'+
       '<div class="btns"><button class="btn alt" style="flex:1" data-act="impfile">Datei wählen</button><button class="btn red" style="flex:1" data-act="imp">Laden und ersetzen</button></div><input type="file" id="impF" accept=".json,application/json,text/plain" hidden>';
   } else if(mPage==='stats'){
